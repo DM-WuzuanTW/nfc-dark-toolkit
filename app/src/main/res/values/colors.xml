@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark Theme Colors -->
+    <color name="color_bg">#121212</color>
+    <color name="color_surface">#1E1E1E</color>
+    <color name="color_surface_variant">#2D2D2D</color>
+    
+    <!-- Primary Colors -->
+    <color name="color_primary">#BB86FC</color>
+    <color name="color_primary_variant">#3700B3</color>
+    <color name="color_primary_dark">#6200EE</color>
+    
+    <!-- Secondary Colors -->
+    <color name="color_secondary">#03DAC5</color>
+    <color name="color_secondary_variant">#018786</color>
+    
+    <!-- On Colors (text on colored backgrounds) -->
+    <color name="color_on_primary">#FFFFFF</color>
+    <color name="color_on_secondary">#000000</color>
+    <color name="color_on_background">#E0E0E0</color>
+    <color name="color_on_surface">#E0E0E0</color>
+    
+    <!-- Text Colors -->
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#B0B0B0</color>
+    <color name="text_disabled">#757575</color>
+    
+    <!-- Status Colors -->
+    <color name="color_success">#4CAF50</color>
+    <color name="color_warning">#FF9800</color>
+    <color name="color_error">#CF6679</color>
+    <color name="color_info">#2196F3</color>
+    
+    <!-- Divider & Border -->
+    <color name="color_divider">#2D2D2D</color>
+    <color name="color_border">#424242</color>
+    
+    <!-- NFC Status Colors -->
+    <color name="nfc_active">#03DAC5</color>
+    <color name="nfc_inactive">#CF6679</color>
+    <color name="nfc_reading">#BB86FC</color>
+    
+    <!-- Card & Button -->
+    <color name="card_background">#1E1E1E</color>
+    <color name="button_disabled">#3A3A3A</color>
+    
+    <!-- Transparent Overlays -->
+    <color name="overlay_dark">#CC000000</color>
+    <color name="overlay_light">#33FFFFFF</color>
+    
+    <!-- Light Theme Colors (for system theme switch) -->
+    <color name="color_bg_light">#FFFFFF</color>
+    <color name="color_surface_light">#F5F5F5</color>
+    <color name="color_primary_light">#6200EE</color>
+    <color name="text_primary_light">#000000</color>
+    <color name="text_secondary_light">#757575</color>
+</resources>
+

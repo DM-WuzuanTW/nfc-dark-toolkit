@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/scanFragment">
+
+    <fragment
+        android:id="@+id/scanFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.home.ScanFragment"
+        android:label="@string/nav_scan" />
+
+    <fragment
+        android:id="@+id/writeFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.write.WriteFragment"
+        android:label="@string/nav_write" />
+
+    <fragment
+        android:id="@+id/emulateFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.emulate.EmulateFragment"
+        android:label="@string/nav_emulate" />
+
+    <fragment
+        android:id="@+id/historyFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.history.HistoryFragment"
+        android:label="@string/nav_history" />
+
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.settings.SettingsFragment"
+        android:label="@string/nav_settings" />
+
+</navigation>
+

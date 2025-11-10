@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<host-apdu-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/app_name"
+    android:requireDeviceUnlock="false">
+    
+    <!-- 預設 AID，可以在應用中動態更改 -->
+    <aid-group
+        android:category="other"
+        android:description="@string/app_name">
+        <!-- 範例 AID: F0010203040506 -->
+        <aid-filter android:name="F0010203040506" />
+    </aid-group>
+    
+</host-apdu-service>
+
