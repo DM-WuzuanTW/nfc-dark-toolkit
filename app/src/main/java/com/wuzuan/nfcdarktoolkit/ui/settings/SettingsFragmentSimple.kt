@@ -4,6 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.RadioButton
+import android.widget.RadioGroup
+import androidx.appcompat.widget.SwitchCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -11,61 +14,69 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.snackbar.Snackbar
 import com.wuzuan.nfcdarktoolkit.R
-import com.wuzuan.nfcdarktoolkit.databinding.FragmentSettingsBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class SettingsFragment : Fragment() {
-    
-    private var _binding: FragmentSettingsBinding? = null
-    private val binding get() = _binding!!
+class SettingsFragmentSimple : Fragment() {
     
     private val viewModel: SettingsViewModel by viewModels()
+    
+    private lateinit var rgTheme: RadioGroup
+    private lateinit var rbThemeSystem: RadioButton
+    private lateinit var rbThemeDark: RadioButton
+    private lateinit var rbThemeLight: RadioButton
+    private lateinit var switchAutoSave: SwitchCompat
+    private lateinit var switchSafeMode: SwitchCompat
     
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
-        return binding.root
-    }
-    
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+    ): View? {
+        val view = inflater.inflate(R.layout.fragment_settings_simple, container, false)
         
-        setupListeners()
-        observeSettings()
+        try {
+            rgTheme = view.findViewById(R.id.rg_theme_simple)
+            rbThemeSystem = view.findViewById(R.id.rb_theme_system_simple)
+            rbThemeDark = view.findViewById(R.id.rb_theme_dark_simple)
+            rbThemeLight = view.findViewById(R.id.rb_theme_light_simple)
+            switchAutoSave = view.findViewById(R.id.switch_auto_save_simple)
+            switchSafeMode = view.findViewById(R.id.switch_safe_mode_simple)
+            
+            setupListeners()
+            observeSettings()
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        
+        return view
     }
     
     private fun setupListeners() {
-        // Theme RadioGroup
-        binding.rgTheme.setOnCheckedChangeListener { _, checkedId ->
+        rgTheme.setOnCheckedChangeListener { _, checkedId ->
             when (checkedId) {
-                R.id.rb_theme_system -> {
+                R.id.rb_theme_system_simple -> {
                     viewModel.setThemeMode("system")
                     showMessage("已切換至跟隨系統主題")
                 }
-                R.id.rb_theme_dark -> {
+                R.id.rb_theme_dark_simple -> {
                     viewModel.setThemeMode("dark")
                     showMessage("已切換至深色主題")
                 }
-                R.id.rb_theme_light -> {
+                R.id.rb_theme_light_simple -> {
                     viewModel.setThemeMode("light")
                     showMessage("已切換至淺色主題")
                 }
             }
         }
         
-        // Auto Save History Switch
-        binding.switchAutoSave.setOnCheckedChangeListener { _, isChecked ->
+        switchAutoSave.setOnCheckedChangeListener { _, isChecked ->
             viewModel.setAutoSaveHistory(isChecked)
             showMessage(if (isChecked) "已開啟自動儲存歷史" else "已關閉自動儲存歷史")
         }
         
-        // Safe Mode Switch
-        binding.switchSafeMode.setOnCheckedChangeListener { _, isChecked ->
+        switchSafeMode.setOnCheckedChangeListener { _, isChecked ->
             viewModel.setSafeModeEnabled(isChecked)
             showMessage(if (isChecked) "已開啟安全模式" else "已關閉安全模式")
         }
@@ -74,28 +85,25 @@ class SettingsFragment : Fragment() {
     private fun observeSettings() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Observe theme mode
                 launch {
                     viewModel.themeMode.collect { mode ->
                         when (mode) {
-                            "system" -> binding.rbThemeSystem.isChecked = true
-                            "dark" -> binding.rbThemeDark.isChecked = true
-                            "light" -> binding.rbThemeLight.isChecked = true
+                            "system" -> rbThemeSystem.isChecked = true
+                            "dark" -> rbThemeDark.isChecked = true
+                            "light" -> rbThemeLight.isChecked = true
                         }
                     }
                 }
                 
-                // Observe auto save history
                 launch {
                     viewModel.autoSaveHistory.collect { enabled ->
-                        binding.switchAutoSave.isChecked = enabled
+                        switchAutoSave.isChecked = enabled
                     }
                 }
                 
-                // Observe safe mode
                 launch {
                     viewModel.safeModeEnabled.collect { enabled ->
-                        binding.switchSafeMode.isChecked = enabled
+                        switchSafeMode.isChecked = enabled
                     }
                 }
             }
@@ -103,12 +111,7 @@ class SettingsFragment : Fragment() {
     }
     
     private fun showMessage(message: String) {
-        Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
-    }
-    
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
+        Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
     }
 }
 

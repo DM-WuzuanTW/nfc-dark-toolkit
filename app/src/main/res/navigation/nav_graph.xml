@@ -6,27 +6,27 @@
 
     <fragment
         android:id="@+id/scanFragment"
-        android:name="com.wuzuan.nfcdarktoolkit.ui.home.ScanFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.home.ScanFragmentEnhanced"
         android:label="@string/nav_scan" />
 
     <fragment
         android:id="@+id/writeFragment"
-        android:name="com.wuzuan.nfcdarktoolkit.ui.write.WriteFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.write.WriteFragmentSimple"
         android:label="@string/nav_write" />
 
     <fragment
         android:id="@+id/emulateFragment"
-        android:name="com.wuzuan.nfcdarktoolkit.ui.emulate.EmulateFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.emulate.EmulateFragmentSimple"
         android:label="@string/nav_emulate" />
 
     <fragment
         android:id="@+id/historyFragment"
-        android:name="com.wuzuan.nfcdarktoolkit.ui.history.HistoryFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.history.HistoryFragmentSimple"
         android:label="@string/nav_history" />
 
     <fragment
         android:id="@+id/settingsFragment"
-        android:name="com.wuzuan.nfcdarktoolkit.ui.settings.SettingsFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.settings.SettingsFragmentSimple"
         android:label="@string/nav_settings" />
 
 </navigation>

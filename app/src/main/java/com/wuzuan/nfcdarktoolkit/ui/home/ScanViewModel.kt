@@ -44,7 +44,10 @@ class ScanViewModel @Inject constructor(
                 val ndefRecords = ndefReader.readNdefFromTag(tag)
                 val completeTagInfo = tagInfo.copy(ndefRecords = ndefRecords)
                 
-                _uiState.value = ScanUiState.Success(completeTagInfo)
+                _uiState.value = ScanUiState.Success(
+                    tagInfo = completeTagInfo,
+                    rawTag = tag
+                )
                 
                 // 儲存歷史記錄
                 saveHistory(completeTagInfo)
@@ -77,7 +80,7 @@ class ScanViewModel @Inject constructor(
 sealed class ScanUiState {
     object Idle : ScanUiState()
     object Reading : ScanUiState()
-    data class Success(val tagInfo: TagInfo) : ScanUiState()
+    data class Success(val tagInfo: TagInfo, val rawTag: Tag? = null) : ScanUiState()
     data class Error(val message: String) : ScanUiState()
 }
 

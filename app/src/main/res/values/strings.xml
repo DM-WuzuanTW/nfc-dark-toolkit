@@ -29,7 +29,7 @@
     <string name="nfc_ready">準備掃描 NFC 標籤...</string>
     <string name="nfc_reading">讀取中...</string>
     <string name="nfc_writing">寫入中...</string>
-    <string name="nfc_tag_detected">偵測到 NFC 標籤</string>
+    <string name="scan_tag_detected">偵測到 NFC 標籤</string>
     
     <!-- Scan Screen -->
     <string name="scan_title">NFC 標籤掃描</string>

@@ -18,7 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
-class WriteFragment : Fragment() {
+class WriteFragmentSimple : Fragment() {
     
     private val viewModel: WriteViewModel by viewModels()
     
@@ -26,8 +26,6 @@ class WriteFragment : Fragment() {
     private lateinit var etUrl: EditText
     private lateinit var tvStatus: TextView
     private lateinit var progressBar: ProgressBar
-    private lateinit var btnWriteText: Button
-    private lateinit var btnWriteUrl: Button
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -36,32 +34,28 @@ class WriteFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.fragment_write_simple, container, false)
         
-        try {
-            etText = view.findViewById(R.id.et_text_simple)
-            etUrl = view.findViewById(R.id.et_url_simple)
-            tvStatus = view.findViewById(R.id.tv_status_simple)
-            progressBar = view.findViewById(R.id.progress_simple)
-            btnWriteText = view.findViewById(R.id.btn_write_text)
-            btnWriteUrl = view.findViewById(R.id.btn_write_url)
-            
-            setupButtons()
-            setupObservers()
-            setupNfcListener()
-        } catch (e: Exception) {
-            e.printStackTrace()
-            Toast.makeText(requireContext(), "初始化錯誤: ${e.message}", Toast.LENGTH_LONG).show()
-        }
+        etText = view.findViewById(R.id.et_text_simple)
+        etUrl = view.findViewById(R.id.et_url_simple)
+        tvStatus = view.findViewById(R.id.tv_status_simple)
+        progressBar = view.findViewById(R.id.progress_simple)
+        
+        val btnWriteText: Button = view.findViewById(R.id.btn_write_text)
+        val btnWriteUrl: Button = view.findViewById(R.id.btn_write_url)
+        
+        setupButtons(btnWriteText, btnWriteUrl)
+        setupObservers()
+        setupNfcListener()
         
         return view
     }
     
-    private fun setupButtons() {
-        btnWriteText.setOnClickListener {
+    private fun setupButtons(btnText: Button, btnUrl: Button) {
+        btnText.setOnClickListener {
             viewModel.setWriteType(WriteType.TEXT)
             Snackbar.make(requireView(), "請靠近標籤寫入文字", Snackbar.LENGTH_SHORT).show()
         }
         
-        btnWriteUrl.setOnClickListener {
+        btnUrl.setOnClickListener {
             viewModel.setWriteType(WriteType.URL)
             Snackbar.make(requireView(), "請靠近標籤寫入網址", Snackbar.LENGTH_SHORT).show()
         }
@@ -107,16 +101,12 @@ class WriteFragment : Fragment() {
                             val text = etText.text.toString()
                             if (text.isNotBlank()) {
                                 viewModel.writeText(tag, text)
-                            } else {
-                                Snackbar.make(requireView(), "請輸入文字", Snackbar.LENGTH_SHORT).show()
                             }
                         }
                         WriteType.URL -> {
                             val url = etUrl.text.toString()
                             if (url.isNotBlank()) {
                                 viewModel.writeUri(tag, url)
-                            } else {
-                                Snackbar.make(requireView(), "請輸入網址", Snackbar.LENGTH_SHORT).show()
                             }
                         }
                         else -> {
@@ -128,3 +118,4 @@ class WriteFragment : Fragment() {
         }
     }
 }
+

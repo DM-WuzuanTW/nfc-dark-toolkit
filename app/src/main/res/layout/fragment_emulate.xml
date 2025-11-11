@@ -2,15 +2,18 @@
 <androidx.core.widget.NestedScrollView 
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_bg">
+    android:background="@color/color_bg"
+    android:fillViewport="true">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/spacing_medium">
 
+        <!-- Title -->
         <TextView
             android:id="@+id/tv_title"
             android:layout_width="wrap_content"
@@ -20,14 +23,159 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <!-- Status Card -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_status"
+            style="@style/Widget.NFCDarkToolkit.Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_medium"
+            app:layout_constraintTop_toBottomOf="@id/tv_title">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_medium">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/emulate_status"
+                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2" />
+
+                <TextView
+                    android:id="@+id/tv_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_tiny"
+                    android:text="@string/emulate_inactive"
+                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+                    tools:text="模擬中" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <!-- AID Input -->
         <TextView
+            android:id="@+id/tv_aid_label"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_large"
+            android:text="@string/emulate_aid"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/card_status" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_aid"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:hint="@string/emulate_aid_hint"
+            app:boxBackgroundColor="@color/color_surface"
+            app:layout_constraintTop_toBottomOf="@id/tv_aid_label">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_aid"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:inputType="textCapCharacters"
+                android:text="F0010203040506"
+                android:textColor="@color/text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Response Data Input -->
+        <TextView
+            android:id="@+id/tv_response_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/spacing_medium"
-            android:text="模擬功能開發中..."
-            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
+            android:text="@string/emulate_response"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/tv_title" />
+            app:layout_constraintTop_toBottomOf="@id/til_aid" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/til_response"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:hint="@string/emulate_response_hint"
+            app:boxBackgroundColor="@color/color_surface"
+            app:layout_constraintTop_toBottomOf="@id/tv_response_label">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/et_response"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="monospace"
+                android:inputType="textCapCharacters|textMultiLine"
+                android:minLines="3"
+                android:textColor="@color/text_primary" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <!-- Control Buttons -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_start"
+            style="@style/Widget.NFCDarkToolkit.Button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_large"
+            android:layout_marginEnd="@dimen/spacing_small"
+            android:text="@string/emulate_start"
+            app:icon="@drawable/ic_emulate"
+            app:layout_constraintEnd_toStartOf="@id/btn_stop"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/til_response" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_stop"
+            style="@style/Widget.NFCDarkToolkit.Button.Outlined"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/spacing_small"
+            android:text="@string/emulate_stop"
+            app:icon="@drawable/ic_settings"
+            app:layout_constraintBaseline_toBaselineOf="@id/btn_start"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/btn_start" />
+
+        <!-- Info -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_info"
+            style="@style/Widget.NFCDarkToolkit.Card"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_large"
+            app:cardBackgroundColor="@color/color_surface_variant"
+            app:layout_constraintTop_toBottomOf="@id/btn_start">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="@dimen/spacing_medium">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💡 提示"
+                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="@dimen/spacing_small"
+                    android:text="• AID 必須是十六進位格式（至少 10 個字符）\n• 回應資料為選填，若不填則自動回傳成功狀態\n• 啟動後將手機靠近讀卡機進行測試\n• 僅供開發測試使用"
+                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2" />
+
+            </LinearLayout>
+
+        </com.google.android.material.card.MaterialCardView>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
