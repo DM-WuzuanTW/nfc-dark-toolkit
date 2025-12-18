@@ -27,7 +27,8 @@ class NfcManager @Inject constructor(
 
     fun enableForegroundDispatch(activity: Activity) {
         val intent = Intent(activity, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        val pendingIntent = PendingIntent.getActivity(activity, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        // Android 12+ requires FLAG_MUTABLE for NFC foreground dispatch so the system can populate extras
+        val pendingIntent = PendingIntent.getActivity(activity, 0, intent, PendingIntent.FLAG_MUTABLE)
         nfcAdapter?.enableForegroundDispatch(activity, pendingIntent, null, null)
     }
 

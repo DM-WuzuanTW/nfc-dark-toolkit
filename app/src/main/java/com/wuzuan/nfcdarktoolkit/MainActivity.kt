@@ -64,6 +64,11 @@ class MainActivity : AppCompatActivity() {
         checkNfcStatus()
         setupAdBanner()
         observeSettings()
+        
+        // 檢查啟動 Intent 是否包含 NFC 資料 (針對冷啟動)
+        if (intent != null) {
+            handleNfcIntent(intent)
+        }
     }
     
     override fun onResume() {
