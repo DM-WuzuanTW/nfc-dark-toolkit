@@ -329,14 +329,7 @@
                     android:text="複製內容"
                     android:textAllCaps="false" />
 
-                <Button
-                    android:id="@+id/btn_format_tag"
-                    style="@style/Widget.NFCDarkToolkit.Button.Danger"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="8dp"
-                    android:text="@string/tag_op_format"
-                    android:textAllCaps="false" />
+
 
             </LinearLayout>
 

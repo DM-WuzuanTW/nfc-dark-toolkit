@@ -59,7 +59,6 @@ class ScanFragmentEnhanced : Fragment() {
     private lateinit var tvNdefContent: TextView
     
     private lateinit var btnCopyContent: Button
-    private lateinit var btnFormatTag: Button
     private lateinit var idleIcon: ImageView
     private lateinit var radarScanView: ImageView
     private lateinit var idleSubText: TextView
@@ -112,7 +111,6 @@ class ScanFragmentEnhanced : Fragment() {
         tvNdefContent = view.findViewById(R.id.tv_ndef_content_scan)
         
         btnCopyContent = view.findViewById(R.id.btn_copy_content)
-        btnFormatTag = view.findViewById(R.id.btn_format_tag)
     }
     
     private fun setupObservers() {
@@ -146,10 +144,6 @@ class ScanFragmentEnhanced : Fragment() {
         btnCopyContent.setOnClickListener {
             copyContentToClipboard()
         }
-        
-        btnFormatTag.setOnClickListener {
-            showFormatConfirmDialog()
-        }
     }
     
     private fun updateUI(state: ScanUiState) {
@@ -173,7 +167,7 @@ class ScanFragmentEnhanced : Fragment() {
                 val tagInfo = state.tagInfo
                 
                 // 顯示標籤資訊（參考 NFC Tools）
-                tvManufacturer.text = "鑽石託管"
+                tvManufacturer.text = TagInfoHelper.getManufacturer(state.rawTag!!)
                 tvTagId.text = tagInfo.id
                 tvTagType.text = TagInfoHelper.getDetailedTagModel(state.rawTag!!, tagInfo.type)
                 tvTechList.text = tagInfo.techList.joinToString(", ")
@@ -240,33 +234,5 @@ class ScanFragmentEnhanced : Fragment() {
         }
     }
     
-    private fun showFormatConfirmDialog() {
-        MaterialAlertDialogBuilder(requireContext())
-            .setTitle(getString(R.string.tag_op_format))
-            .setMessage(getString(R.string.tag_op_format_warning))
-            .setPositiveButton("格式化") { _, _ ->
-                formatTag()
-            }
-            .setNegativeButton("取消", null)
-            .show()
-    }
-    
-    private fun formatTag() {
-        val state = viewModel.uiState.value
-        if (state !is ScanUiState.Success || state.rawTag == null) return
-        
-        lifecycleScope.launch {
-            val result = tagOperations.formatTag(state.rawTag)
-            
-            if (result.isSuccess) {
-                Snackbar.make(requireView(), "格式化成功", Snackbar.LENGTH_LONG).show()
-            } else {
-                Snackbar.make(
-                    requireView(),
-                    result.exceptionOrNull()?.message ?: "格式化失敗",
-                    Snackbar.LENGTH_LONG
-                ).show()
-            }
-        }
-    }
+
 }
