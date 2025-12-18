@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_bg"
+    android:padding="16dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="關於數位名片"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline1"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="什麼是數位名片？"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="數位名片是一種現代化的資訊交換技術，它允許您只需輕輕一碰，就能將手機中的資訊（例如您的聯絡方式、社群媒體帳號或任何網址）無線傳輸到另一支支援此功能的手機上。"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
+            android:textColor="@color/text_secondary" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="如何使用？"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="只需將您的手機解鎖，並將背面上方靠近另一支手機或我們的數位名片產品，即可立即分享或接收資訊。整個過程無需配對、無需網路，快速又方便。"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
+            android:textColor="@color/text_secondary" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="這安全嗎？"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="我們的數位名片技術僅在極近的距離內（通常小於4公分）才能感應，確保了您的資料只有在您主動分享時才會傳輸。此外，您可以隨時在 App 中修改或清除卡片上的內容。"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
+            android:textColor="@color/text_secondary" />
+
+    </LinearLayout>
+</ScrollView>

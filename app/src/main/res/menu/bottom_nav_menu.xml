@@ -1,28 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/scanFragment"
-        android:icon="@drawable/ic_scan"
-        android:title="@string/nav_scan" />
+        android:id="@+id/readFragment"
+        android:icon="@drawable/ic_read"
+        android:title="讀取" />
     
     <item
         android:id="@+id/writeFragment"
         android:icon="@drawable/ic_write"
-        android:title="@string/nav_write" />
+        android:title="寫入" />
     
     <item
-        android:id="@+id/emulateFragment"
-        android:icon="@drawable/ic_emulate"
-        android:title="@string/nav_emulate" />
+        android:id="@+id/editFragment"
+        android:icon="@drawable/ic_edit"
+        android:title="編輯" />
+    
+    <item
+        android:id="@+id/otherFragment"
+        android:icon="@drawable/ic_other"
+        android:title="其他" />
     
     <item
         android:id="@+id/historyFragment"
         android:icon="@drawable/ic_history"
-        android:title="@string/nav_history" />
+        android:title="歷史" />
     
     <item
         android:id="@+id/settingsFragment"
         android:icon="@drawable/ic_settings"
-        android:title="@string/nav_settings" />
+        android:title="設置" />
 </menu>
 

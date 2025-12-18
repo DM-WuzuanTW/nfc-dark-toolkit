@@ -39,8 +39,8 @@ class WriteViewModel @Inject constructor(
                 "text" -> WriteType.TEXT
                 "url" -> WriteType.URL
                 "wifi" -> WriteType.WIFI
-                "vcard" -> WriteType.VCARD
-                "json" -> WriteType.JSON
+                "vcard" -> WriteType.CONTACT
+                "json" -> WriteType.TEXT
                 else -> WriteType.TEXT
             }
         }
@@ -234,10 +234,6 @@ class WriteViewModel @Inject constructor(
         
         historyRepository.insertHistory(record)
     }
-}
-
-enum class WriteType {
-    TEXT, URL, WIFI, VCARD, JSON
 }
 
 sealed class WriteUiState {

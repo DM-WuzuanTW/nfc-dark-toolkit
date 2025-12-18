@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_bg"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="工具"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline1"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="提供多種實用的數位名片工具"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
+            android:textColor="@color/text_secondary" />
+
+        <!-- Clone Tool -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="克隆工具"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+            android:textColor="@color/text_primary" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@color/color_surface"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="將一張數位名片的完整資料，複製到另一張空白的數位名片上。"
+                android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
+                android:textColor="@color/text_secondary" />
+
+            <Button
+                android:id="@+id/btn_clone_tool"
+                style="@style/Widget.NFCDarkToolkit.Button"
+                android:layout_width="match_parent"
+                android:layout_height="56dp"
+                android:layout_marginTop="16dp"
+                android:text="開始克隆" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>

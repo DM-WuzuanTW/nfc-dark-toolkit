@@ -2,32 +2,42 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/nav_graph"
-    app:startDestination="@id/scanFragment">
+    app:startDestination="@id/readFragment">
 
+    <!-- 讀取 -->
     <fragment
-        android:id="@+id/scanFragment"
+        android:id="@+id/readFragment"
         android:name="com.wuzuan.nfcdarktoolkit.ui.home.ScanFragmentEnhanced"
-        android:label="@string/nav_scan" />
+        android:label="讀取" />
 
+    <!-- 寫入 -->
     <fragment
         android:id="@+id/writeFragment"
-        android:name="com.wuzuan.nfcdarktoolkit.ui.write.WriteFragmentSimple"
-        android:label="@string/nav_write" />
+        android:name="com.wuzuan.nfcdarktoolkit.ui.write.WriteProfessionalFragment"
+        android:label="寫入" />
 
+    <!-- 讀取編輯 -->
     <fragment
-        android:id="@+id/emulateFragment"
-        android:name="com.wuzuan.nfcdarktoolkit.ui.emulate.EmulateFragmentSimple"
-        android:label="@string/nav_emulate" />
+        android:id="@+id/editFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.edit.EditFragment"
+        android:label="編輯" />
 
+    <!-- 其他 -->
+    <fragment
+        android:id="@+id/otherFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.other.OtherFragment"
+        android:label="其他" />
+
+    <!-- 歷史 -->
     <fragment
         android:id="@+id/historyFragment"
         android:name="com.wuzuan.nfcdarktoolkit.ui.history.HistoryFragmentSimple"
-        android:label="@string/nav_history" />
+        android:label="歷史" />
 
+    <!-- 設置 -->
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.wuzuan.nfcdarktoolkit.ui.settings.SettingsFragmentSimple"
-        android:label="@string/nav_settings" />
+        android:label="設置" />
 
 </navigation>
-

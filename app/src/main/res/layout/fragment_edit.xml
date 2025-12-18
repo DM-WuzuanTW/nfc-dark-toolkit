@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_bg"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="讀取編輯"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline1"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:id="@+id/tv_status_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="請靠近標籤讀取內容"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
+            android:textColor="@color/text_secondary" />
+
+        <ProgressBar
+            android:id="@+id/progress_edit"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:visibility="gone" />
+
+        <!-- Content Editing -->
+        <LinearLayout
+            android:id="@+id/layout_edit_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="原始內容"
+                android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+                android:textColor="@color/text_primary" />
+
+            <TextView
+                android:id="@+id/tv_original_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/color_surface_variant"
+                android:fontFamily="monospace"
+                android:padding="12dp"
+                android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
+                android:textColor="@color/text_secondary" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:text="編輯內容"
+                android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+                android:textColor="@color/text_primary" />
+
+            <EditText
+                android:id="@+id/et_edit_content"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/color_surface"
+                android:hint="修改內容..."
+                android:inputType="textMultiLine"
+                android:minLines="4"
+                android:padding="12dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="horizontal">
+
+                <Button
+                    android:id="@+id/btn_save_edit"
+                    style="@style/Widget.NFCDarkToolkit.Button"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:layout_weight="1"
+                    android:text="儲存變更（靠近標籤）"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btn_cancel_edit"
+                    style="@style/Widget.NFCDarkToolkit.Button.Outlined"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:text="取消"
+                    android:textAllCaps="false" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+
+        <!-- Instructions -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:background="@color/color_surface_variant"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="使用說明"
+                android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
+                android:textColor="@color/text_primary"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="1. 靠近標籤自動讀取內容\n2. 在編輯框中修改內容\n3. 點擊「儲存變更」後再靠近標籤\n4. 修改後的內容會寫回標籤"
+                android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
+                android:textColor="@color/text_secondary" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
+</ScrollView>
+

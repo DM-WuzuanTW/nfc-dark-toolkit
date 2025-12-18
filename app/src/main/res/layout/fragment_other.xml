@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/color_bg"
+    android:fillViewport="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="其他操作"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline1"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="標籤進階操作與管理功能"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
+            android:textColor="@color/text_secondary" />
+
+        <!-- Copy Operations -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="複製操作"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+            android:textColor="@color/text_primary" />
+
+        <Button
+            android:id="@+id/btn_copy_tag"
+            style="@style/Widget.NFCDarkToolkit.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="複製標籤"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btn_copy_infinity"
+            style="@style/Widget.NFCDarkToolkit.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="無限複製模式"
+            android:textAllCaps="false" />
+
+        <!-- Dangerous Operations -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="危險操作"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+            android:textColor="@color/color_warning" />
+
+        <Button
+            android:id="@+id/btn_erase_tag"
+            style="@style/Widget.NFCDarkToolkit.Button.Danger"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="擦除標籤"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btn_lock_tag"
+            style="@style/Widget.NFCDarkToolkit.Button.Danger"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="鎖定標籤（永久唯讀）"
+            android:textAllCaps="false" />
+
+        <!-- Memory Operations -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="記憶體操作"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+            android:textColor="@color/text_primary" />
+
+        <Button
+            android:id="@+id/btn_read_memory"
+            style="@style/Widget.NFCDarkToolkit.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="讀取記憶體"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btn_format_memory"
+            style="@style/Widget.NFCDarkToolkit.Button.Danger"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="格式化記憶體"
+            android:textAllCaps="false" />
+
+        <!-- Security Operations -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="安全操作"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+            android:textColor="@color/text_primary" />
+
+        <Button
+            android:id="@+id/btn_set_password"
+            style="@style/Widget.NFCDarkToolkit.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="設定密碼"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@+id/btn_remove_password"
+            style="@style/Widget.NFCDarkToolkit.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="移除密碼"
+            android:textAllCaps="false" />
+
+        <!-- Advanced -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="進階功能"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+            android:textColor="@color/text_primary" />
+
+        <Button
+            android:id="@+id/btn_advanced_commands"
+            style="@style/Widget.NFCDarkToolkit.Button.Outlined"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="進階 NFC 指令"
+            android:textAllCaps="false" />
+
+    </LinearLayout>
+
+</ScrollView>
+
