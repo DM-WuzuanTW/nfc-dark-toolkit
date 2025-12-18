@@ -5,158 +5,113 @@ import android.app.PendingIntent
 import android.content.Intent
 import android.nfc.NfcAdapter
 import android.nfc.Tag
-import android.nfc.tech.*
+import android.nfc.tech.Ndef
+import com.wuzuan.nfcdarktoolkit.MainActivity
 import com.wuzuan.nfcdarktoolkit.domain.model.TagInfo
+import com.wuzuan.nfcdarktoolkit.domain.exception.NfcNotEnabledException
+import com.wuzuan.nfcdarktoolkit.domain.exception.NfcNotSupportedException
+import com.wuzuan.nfcdarktoolkit.domain.exception.TagReadException
+import com.wuzuan.nfcdarktoolkit.utils.Logger
 import com.wuzuan.nfcdarktoolkit.domain.model.TagType
 import javax.inject.Inject
 import javax.inject.Singleton
 
-/**
- * NFC 管理器 - 封裝 NFC 基本操作
- */
 @Singleton
 class NfcManager @Inject constructor(
     private val nfcAdapter: NfcAdapter?
 ) {
-    
-    /**
-     * 檢查設備是否支援 NFC
-     */
-    fun isNfcSupported(): Boolean {
-        return nfcAdapter != null
-    }
-    
-    /**
-     * 檢查 NFC 是否已啟用
-     */
-    fun isNfcEnabled(): Boolean {
-        return nfcAdapter?.isEnabled == true
-    }
-    
-    /**
-     * 啟用前景調度
-     */
+
+    fun isNfcSupported(): Boolean = nfcAdapter != null
+
+    fun isNfcEnabled(): Boolean = nfcAdapter?.isEnabled == true
+
     fun enableForegroundDispatch(activity: Activity) {
-        if (nfcAdapter == null) return
-        
-        val intent = Intent(activity, activity.javaClass).apply {
-            addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
-        }
-        
-        val pendingIntent = PendingIntent.getActivity(
-            activity, 0, intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
-        )
-        
-        nfcAdapter.enableForegroundDispatch(activity, pendingIntent, null, null)
+        val intent = Intent(activity, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+        val pendingIntent = PendingIntent.getActivity(activity, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        nfcAdapter?.enableForegroundDispatch(activity, pendingIntent, null, null)
     }
-    
-    /**
-     * 禁用前景調度
-     */
+
     fun disableForegroundDispatch(activity: Activity) {
         nfcAdapter?.disableForegroundDispatch(activity)
     }
-    
-    /**
-     * 從 Intent 解析 Tag
-     */
-    fun getTagFromIntent(intent: Intent?): Tag? {
-        return intent?.getParcelableExtra(NfcAdapter.EXTRA_TAG)
+
+    fun getTagFromIntent(intent: Intent): Tag? {
+        return intent.getParcelableExtra(NfcAdapter.EXTRA_TAG)
     }
-    
-    /**
-     * 解析標籤基本資訊
-     */
+
     fun parseTagInfo(tag: Tag): TagInfo {
-        val id = bytesToHexString(tag.id)
-        val techList = tag.techList.map { it.substringAfterLast('.') }
-        val tagType = detectTagType(tag)
-        
-        // 檢查是否可寫入
-        var isWritable = false
-        var maxSize: Int? = null
-        var currentSize: Int? = null
-        
-        try {
-            val ndef = Ndef.get(tag)
-            if (ndef != null) {
-                ndef.connect()
-                isWritable = ndef.isWritable
-                maxSize = ndef.maxSize
-                currentSize = ndef.cachedNdefMessage?.toByteArray()?.size
-                ndef.close()
-            } else {
-                // 檢查是否為可格式化標籤
-                val ndefFormatable = NdefFormatable.get(tag)
-                isWritable = ndefFormatable != null
-            }
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-        
-        return TagInfo(
-            id = id,
-            techList = techList,
-            type = tagType,
-            isWritable = isWritable,
-            maxSize = maxSize,
-            currentSize = currentSize
-        )
-    }
-    
-    /**
-     * 偵測標籤類型
-     */
-    private fun detectTagType(tag: Tag): TagType {
-        val techList = tag.techList
-        
-        return when {
-            techList.contains(MifareClassic::class.java.name) -> TagType.MIFARE_CLASSIC
-            techList.contains(MifareUltralight::class.java.name) -> {
-                // 進一步判斷是否為 NTAG
-                try {
-                    val ultralight = MifareUltralight.get(tag)
-                    ultralight.connect()
-                    val type = ultralight.type
-                    ultralight.close()
-                    
-                    when (type) {
-                        MifareUltralight.TYPE_ULTRALIGHT -> TagType.MIFARE_ULTRALIGHT
-                        MifareUltralight.TYPE_ULTRALIGHT_C -> TagType.MIFARE_ULTRALIGHT
-                        else -> TagType.NTAG
-                    }
-                } catch (e: Exception) {
-                    TagType.MIFARE_ULTRALIGHT
+        return try {
+            val tagId = tag.id.joinToString(":") { "%02X".format(it) }
+            val techList = tag.techList.map { it.split('.').last() }
+            val type = TagType.fromTag(tag)
+            
+            // 安全地獲取 NDEF 資訊
+            var isWritable = false
+            var maxSize = 0
+            
+            try {
+                val ndef = Ndef.get(tag)
+                if (ndef != null) {
+                    // 不連接，只獲取基本資訊
+                    isWritable = ndef.isWritable
+                    maxSize = ndef.maxSize
                 }
+            } catch (e: Exception) {
+                Logger.w("獲取 NDEF 資訊失敗，使用預設值: ${e.message}", e)
             }
-            techList.contains(IsoDep::class.java.name) -> TagType.ISO_14443_4
-            techList.contains(NfcA::class.java.name) -> TagType.NFC_A
-            techList.contains(NfcB::class.java.name) -> TagType.NFC_B
-            techList.contains(NfcF::class.java.name) -> TagType.NFC_F
-            techList.contains(NfcV::class.java.name) -> TagType.NFC_V
-            techList.contains(Ndef::class.java.name) -> TagType.NDEF
-            else -> TagType.UNKNOWN
+            
+            Logger.nfc("NfcManager", "解析標籤資訊: ID=$tagId, Type=$type, 技術=${techList.joinToString()}")
+
+            TagInfo(
+                id = tagId,
+                type = type,
+                techList = techList,
+                maxSize = maxSize,
+                isWritable = isWritable,
+                ndefRecords = emptyList() // 記錄將在後續步驟中解析
+            )
+        } catch (e: Exception) {
+            Logger.e("解析標籤資訊失敗: ${e.message}", e)
+            throw TagReadException("無法解析標籤資訊", e)
         }
     }
     
     /**
-     * 將 Byte Array 轉換為十六進位字串
+     * 檢查並確保 NFC 可用
      */
-    fun bytesToHexString(bytes: ByteArray): String {
-        return bytes.joinToString(":") { byte ->
-            "%02X".format(byte)
+    fun ensureNfcAvailable() {
+        if (!isNfcSupported()) {
+            throw NfcNotSupportedException()
+        }
+        if (!isNfcEnabled()) {
+            throw NfcNotEnabledException()
         }
     }
     
     /**
-     * 將十六進位字串轉換為 Byte Array
+     * 安全地啟用前景調度
      */
-    fun hexStringToBytes(hex: String): ByteArray {
-        val cleanHex = hex.replace(":", "").replace(" ", "")
-        return cleanHex.chunked(2)
-            .map { it.toInt(16).toByte() }
-            .toByteArray()
+    fun safeEnableForegroundDispatch(activity: Activity): Boolean {
+        return try {
+            ensureNfcAvailable()
+            enableForegroundDispatch(activity)
+            true
+        } catch (e: Exception) {
+            Logger.w("啟用 NFC 前景調度失敗: ${e.message}", e)
+            false
+        }
+    }
+    
+    /**
+     * 安全地禁用前景調度
+     */
+    fun safeDisableForegroundDispatch(activity: Activity): Boolean {
+        return try {
+            disableForegroundDispatch(activity)
+            true
+        } catch (e: Exception) {
+            Logger.w("禁用 NFC 前景調度失敗: ${e.message}", e)
+            false
+        }
     }
 }
-

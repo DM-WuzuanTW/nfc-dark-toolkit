@@ -34,22 +34,43 @@ class WriteProfessionalViewModel @Inject constructor(
         _writeState.value = WriteProfessionalState.Idle
     }
     
-    fun writeToTag(tag: Tag, input: String) {
-        if (input.isBlank()) {
-            _writeState.value = WriteProfessionalState.Error("輸入不能為空")
-            return
-        }
-        
+    fun writeToTag(tag: Tag, input: String, wifiPassword: String? = null, smsPhone: String? = null, contactName: String? = null, contactPhone: String? = null, contactEmail: String? = null) {
         viewModelScope.launch {
             try {
                 _writeState.value = WriteProfessionalState.Writing
                 
-                val finalContent = processInput(input, _selectedType.value)
-                val result = ndefWriter.writeUri(tag, finalContent)
+                val result: Result<String> = when (_selectedType.value) {
+                    WriteType.WIFI -> ndefWriter.writeWifi(tag, input, wifiPassword)
+                    WriteType.SMS -> ndefWriter.writeSms(tag, smsPhone ?: "", input)
+                    WriteType.CONTACT -> ndefWriter.writeVCard(tag, contactName, contactPhone, contactEmail)
+                    else -> {
+                        val finalContent = processInput(input, _selectedType.value)
+                        ndefWriter.writeUri(tag, finalContent).map { finalContent } 
+                    }
+                }
                 
                 if (result.isSuccess) {
                     _writeState.value = WriteProfessionalState.Success("✓ 寫入成功！")
-                    saveHistory(tag, _selectedType.value, input, finalContent)
+                    
+                    // 根據類型產生詳細描述
+                    val description = when (val type = _selectedType.value) {
+                        WriteType.WIFI -> "SSID: $input\n密碼: ${wifiPassword ?: "無"}"
+                        WriteType.SMS -> "收件人: ${smsPhone ?: "無"}\n內容: $input"
+                        WriteType.CONTACT -> "姓名: $contactName\n電話: $contactPhone\nEmail: $contactEmail"
+                        WriteType.LOCATION -> "地理位置: $input"
+                        WriteType.ADDRESS -> "地址: $input"
+                        WriteType.SOCIAL_DISCORD,
+                        WriteType.SOCIAL_INSTAGRAM,
+                        WriteType.SOCIAL_FACEBOOK,
+                        WriteType.SOCIAL_LINE,
+                        WriteType.SOCIAL_TELEGRAM,
+                        WriteType.SOCIAL_TWITTER,
+                        WriteType.SOCIAL_YOUTUBE,
+                        WriteType.SOCIAL_TIKTOK -> "${type.displayName}: $input"
+                        else -> "內容: $input"
+                    }
+                    
+                    saveHistory(tag, _selectedType.value, description, result.getOrNull() ?: "")
                 } else {
                     _writeState.value = WriteProfessionalState.Error(
                         result.exceptionOrNull()?.message ?: "寫入失敗"
@@ -85,9 +106,7 @@ class WriteProfessionalViewModel @Inject constructor(
             WriteType.FILE -> input
             WriteType.APPLICATION -> "market://details?id=$input"
             WriteType.MAIL -> "mailto:$input"
-            WriteType.CONTACT -> input // vCard 格式另外處理
             WriteType.PHONE -> "tel:$input"
-            WriteType.SMS -> "sms:?body=$input"
             WriteType.LOCATION -> {
                 val coords = input.split(",").map { it.trim() }
                 if (coords.size == 2) {
@@ -99,11 +118,11 @@ class WriteProfessionalViewModel @Inject constructor(
             WriteType.ADDRESS -> "geo:0,0?q=$input"
             WriteType.BITCOIN -> "bitcoin:$input"
             WriteType.BLUETOOTH -> input // 藍牙配對另外處理
-            WriteType.WIFI -> input // WiFi 配置另外處理
+            else -> ""
         }
     }
     
-    private suspend fun saveHistory(tag: Tag, type: WriteType, input: String, finalContent: String) {
+    private suspend fun saveHistory(tag: Tag, type: WriteType, description: String, payload: String) {
         val tagId = tag.id.joinToString(":") { "%02X".format(it) }
         
         val record = HistoryRecord(
@@ -111,8 +130,8 @@ class WriteProfessionalViewModel @Inject constructor(
             tagType = null,
             actionType = ActionType.WRITE,
             title = "寫入${type.displayName}",
-            description = "內容: $input",
-            payloadRaw = finalContent,
+            description = description,
+            payloadRaw = payload,
             timestamp = System.currentTimeMillis()
         )
         
@@ -126,4 +145,3 @@ sealed class WriteProfessionalState {
     data class Success(val message: String) : WriteProfessionalState()
     data class Error(val message: String) : WriteProfessionalState()
 }
-

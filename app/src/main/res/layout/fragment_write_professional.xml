@@ -100,6 +100,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:background="@color/color_surface"
+            android:animateLayoutChanges="true"
             android:orientation="vertical"
             android:padding="16dp">
 
@@ -120,6 +121,81 @@
                 android:textColor="@color/color_secondary"
                 tools:text="輸入您想寫入的文字" />
 
+            <Button
+                android:id="@+id/btn_pick_location"
+                style="@style/Widget.NFCDarkToolkit.Button.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:text="選擇地點"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btn_pick_contact"
+                style="@style/Widget.NFCDarkToolkit.Button.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:text="選擇聯絡人"
+                android:visibility="gone" />
+                
+            <LinearLayout
+                android:id="@+id/layout_contact_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <EditText
+                    android:id="@+id/et_contact_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/color_bg"
+                    android:hint="姓名"
+                    android:inputType="textPersonName"
+                    android:padding="12dp"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary" />
+                
+                <EditText
+                    android:id="@+id/et_contact_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/color_bg"
+                    android:hint="電話"
+                    android:inputType="phone"
+                    android:padding="12dp"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary" />
+                    
+                <EditText
+                    android:id="@+id/et_contact_email"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/color_bg"
+                    android:hint="Email"
+                    android:inputType="textEmailAddress"
+                    android:padding="12dp"
+                    android:textColor="@color/text_primary"
+                    android:textColorHint="@color/text_secondary" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/et_sms_phone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@color/color_bg"
+                android:hint="輸入電話號碼..."
+                android:inputType="phone"
+                android:padding="12dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary"
+                android:visibility="gone" />
+
             <EditText
                 android:id="@+id/et_input"
                 android:layout_width="match_parent"
@@ -127,40 +203,25 @@
                 android:layout_marginTop="8dp"
                 android:background="@color/color_bg"
                 android:hint="輸入內容..."
-                android:inputType="text"
+                android:inputType="textMultiLine"
                 android:minLines="2"
+                android:gravity="top"
                 android:padding="12dp"
                 android:textColor="@color/text_primary"
                 android:textColorHint="@color/text_secondary" />
 
-        </LinearLayout>
-
-        <!-- Preview -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
-            android:background="@color/color_surface_variant"
-            android:orientation="vertical"
-            android:padding="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="預覽"
-                android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
-                android:textColor="@color/text_primary"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tv_preview"
+            <EditText
+                android:id="@+id/et_wifi_password"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
-                android:fontFamily="monospace"
-                android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
-                android:textColor="@color/text_secondary"
-                tools:text="將寫入：\nHello World" />
+                android:background="@color/color_bg"
+                android:hint="輸入 Wi-Fi 密碼..."
+                android:inputType="textPassword"
+                android:padding="12dp"
+                android:textColor="@color/text_primary"
+                android:textColorHint="@color/text_secondary"
+                android:visibility="gone" />
 
         </LinearLayout>
 

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_graph"
     app:startDestination="@id/readFragment">
 
@@ -8,13 +9,15 @@
     <fragment
         android:id="@+id/readFragment"
         android:name="com.wuzuan.nfcdarktoolkit.ui.home.ScanFragmentEnhanced"
-        android:label="讀取" />
+        android:label="讀取"
+        tools:layout="@layout/fragment_scan_enhanced" />
 
     <!-- 寫入 -->
     <fragment
         android:id="@+id/writeFragment"
         android:name="com.wuzuan.nfcdarktoolkit.ui.write.WriteProfessionalFragment"
-        android:label="寫入" />
+        android:label="寫入"
+        tools:layout="@layout/fragment_write_professional" />
 
     <!-- 讀取編輯 -->
     <fragment
@@ -22,22 +25,27 @@
         android:name="com.wuzuan.nfcdarktoolkit.ui.edit.EditFragment"
         android:label="編輯" />
 
-    <!-- 其他 -->
+    <!-- 工具 -->
     <fragment
-        android:id="@+id/otherFragment"
-        android:name="com.wuzuan.nfcdarktoolkit.ui.other.OtherFragment"
-        android:label="其他" />
-
-    <!-- 歷史 -->
-    <fragment
-        android:id="@+id/historyFragment"
-        android:name="com.wuzuan.nfcdarktoolkit.ui.history.HistoryFragmentSimple"
-        android:label="歷史" />
+        android:id="@+id/toolsFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.tools.ToolsFragment"
+        android:label="工具" />
 
     <!-- 設置 -->
     <fragment
         android:id="@+id/settingsFragment"
         android:name="com.wuzuan.nfcdarktoolkit.ui.settings.SettingsFragmentSimple"
-        android:label="設置" />
+        android:label="設置" >
+        <action
+            android:id="@+id/action_settingsFragment_to_aboutDigitalCardFragment"
+            app:destination="@id/aboutDigitalCardFragment" />
+    </fragment>
+
+    <!-- 關於數位名片 -->
+    <fragment
+        android:id="@+id/aboutDigitalCardFragment"
+        android:name="com.wuzuan.nfcdarktoolkit.ui.settings.AboutDigitalCardFragment"
+        android:label="關於數位名片"
+        tools:layout="@layout/fragment_about_digital_card" />
 
 </navigation>

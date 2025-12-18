@@ -1,33 +1,19 @@
 package com.wuzuan.nfcdarktoolkit.ui.settings
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.RadioButton
-import android.widget.RadioGroup
-import androidx.appcompat.widget.SwitchCompat
+import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.repeatOnLifecycle
-import com.google.android.material.snackbar.Snackbar
+import androidx.navigation.fragment.findNavController
 import com.wuzuan.nfcdarktoolkit.R
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class SettingsFragmentSimple : Fragment() {
-    
-    private val viewModel: SettingsViewModel by viewModels()
-    
-    private lateinit var rgTheme: RadioGroup
-    private lateinit var rbThemeSystem: RadioButton
-    private lateinit var rbThemeDark: RadioButton
-    private lateinit var rbThemeLight: RadioButton
-    private lateinit var switchAutoSave: SwitchCompat
-    private lateinit var switchSafeMode: SwitchCompat
     
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -37,15 +23,7 @@ class SettingsFragmentSimple : Fragment() {
         val view = inflater.inflate(R.layout.fragment_settings_simple, container, false)
         
         try {
-            rgTheme = view.findViewById(R.id.rg_theme_simple)
-            rbThemeSystem = view.findViewById(R.id.rb_theme_system_simple)
-            rbThemeDark = view.findViewById(R.id.rb_theme_dark_simple)
-            rbThemeLight = view.findViewById(R.id.rb_theme_light_simple)
-            switchAutoSave = view.findViewById(R.id.switch_auto_save_simple)
-            switchSafeMode = view.findViewById(R.id.switch_safe_mode_simple)
-            
-            setupListeners()
-            observeSettings()
+            setupListeners(view)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -53,65 +31,23 @@ class SettingsFragmentSimple : Fragment() {
         return view
     }
     
-    private fun setupListeners() {
-        rgTheme.setOnCheckedChangeListener { _, checkedId ->
-            when (checkedId) {
-                R.id.rb_theme_system_simple -> {
-                    viewModel.setThemeMode("system")
-                    showMessage("已切換至跟隨系統主題")
-                }
-                R.id.rb_theme_dark_simple -> {
-                    viewModel.setThemeMode("dark")
-                    showMessage("已切換至深色主題")
-                }
-                R.id.rb_theme_light_simple -> {
-                    viewModel.setThemeMode("light")
-                    showMessage("已切換至淺色主題")
-                }
-            }
+    private fun setupListeners(view: View) {
+        view.findViewById<TextView>(R.id.tv_about_digital_card).setOnClickListener {
+            findNavController().navigate(R.id.action_settingsFragment_to_aboutDigitalCardFragment)
         }
-        
-        switchAutoSave.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.setAutoSaveHistory(isChecked)
-            showMessage(if (isChecked) "已開啟自動儲存歷史" else "已關閉自動儲存歷史")
-        }
-        
-        switchSafeMode.setOnCheckedChangeListener { _, isChecked ->
-            viewModel.setSafeModeEnabled(isChecked)
-            showMessage(if (isChecked) "已開啟安全模式" else "已關閉安全模式")
-        }
+
+        // Related Links
+        view.findViewById<TextView>(R.id.link_website).setOnClickListener { openUrl("https://diamondhost.tw/") }
+        view.findViewById<TextView>(R.id.link_panel).setOnClickListener { openUrl("https://panel.diamondhost.tw/") }
+        view.findViewById<TextView>(R.id.link_store).setOnClickListener { openUrl("https://store.diamondhost.tw/link.php?id=1") }
+        view.findViewById<TextView>(R.id.link_status).setOnClickListener { openUrl("https://status.diamondhost.tw/") }
+        view.findViewById<TextView>(R.id.link_docs).setOnClickListener { openUrl("https://docs.diamondhost.tw/") }
+        view.findViewById<TextView>(R.id.link_discord).setOnClickListener { openUrl("https://discord.gg/5Fky5SEfBd") }
+        view.findViewById<TextView>(R.id.link_telegram).setOnClickListener { openUrl("https://t.me/diamond_hosting") }
     }
-    
-    private fun observeSettings() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.themeMode.collect { mode ->
-                        when (mode) {
-                            "system" -> rbThemeSystem.isChecked = true
-                            "dark" -> rbThemeDark.isChecked = true
-                            "light" -> rbThemeLight.isChecked = true
-                        }
-                    }
-                }
-                
-                launch {
-                    viewModel.autoSaveHistory.collect { enabled ->
-                        switchAutoSave.isChecked = enabled
-                    }
-                }
-                
-                launch {
-                    viewModel.safeModeEnabled.collect { enabled ->
-                        switchSafeMode.isChecked = enabled
-                    }
-                }
-            }
-        }
-    }
-    
-    private fun showMessage(message: String) {
-        Snackbar.make(requireView(), message, Snackbar.LENGTH_SHORT).show()
+
+    private fun openUrl(url: String) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        startActivity(intent)
     }
 }
-

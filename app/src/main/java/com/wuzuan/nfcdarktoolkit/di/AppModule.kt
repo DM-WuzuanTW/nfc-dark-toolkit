@@ -3,6 +3,7 @@ package com.wuzuan.nfcdarktoolkit.di
 import android.content.Context
 import android.nfc.NfcAdapter
 import com.wuzuan.nfcdarktoolkit.data.local.prefs.SettingsDataStore
+import com.wuzuan.nfcdarktoolkit.utils.DebugReporter
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -32,5 +33,12 @@ object AppModule {
     ): SettingsDataStore {
         return SettingsDataStore(context)
     }
+    
+    @Provides
+    @Singleton
+    fun provideDebugReporter(
+        @ApplicationContext context: Context
+    ): DebugReporter {
+        return DebugReporter(context)
+    }
 }
-

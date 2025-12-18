@@ -7,6 +7,9 @@ import android.nfc.Tag
 import android.nfc.tech.Ndef
 import android.nfc.tech.NdefFormatable
 import com.wuzuan.nfcdarktoolkit.domain.model.NdefContent
+import com.wuzuan.nfcdarktoolkit.domain.exception.*
+import com.wuzuan.nfcdarktoolkit.nfc.UriPrefixConstants
+import com.wuzuan.nfcdarktoolkit.utils.Logger
 import java.io.IOException
 import java.nio.charset.Charset
 import javax.inject.Inject
@@ -37,6 +40,48 @@ class NdefWriter @Inject constructor() {
     }
     
     /**
+     * 寫入 Wi-Fi 網路到標籤
+     */
+    fun writeWifi(tag: Tag, ssid: String, pass: String?, securityType: String = "WPA"): Result<String> {
+        val wifiString = "WIFI:S:$ssid;T:$securityType;P:$pass;;"
+        val record = createTextRecord(wifiString)
+        val message = NdefMessage(arrayOf(record))
+        return writeNdefMessage(tag, message).map { wifiString }
+    }
+    
+    /**
+     * 寫入簡訊到標籤
+     */
+    fun writeSms(tag: Tag, phone: String, message: String): Result<String> {
+        val smsUri = "sms:$phone?body=$message"
+        val record = createUriRecord(smsUri)
+        val ndefMessage = NdefMessage(arrayOf(record))
+        return writeNdefMessage(tag, ndefMessage).map { smsUri }
+    }
+
+    /**
+     * 寫入 vCard 到標籤
+     */
+    fun writeVCard(tag: Tag, name: String?, phone: String?, email: String?): Result<String> {
+        val vcardString = buildString {
+            appendLine("BEGIN:VCARD")
+            appendLine("VERSION:3.0")
+            name?.let { appendLine("FN:$it") }
+            phone?.let { appendLine("TEL:$it") }
+            email?.let { appendLine("EMAIL:$it") }
+            append("END:VCARD")
+        }
+        val record = NdefRecord(
+            NdefRecord.TNF_MIME_MEDIA,
+            "text/vcard".toByteArray(Charset.forName("UTF-8")),
+            ByteArray(0),
+            vcardString.toByteArray(Charset.forName("UTF-8"))
+        )
+        val message = NdefMessage(arrayOf(record))
+        return writeNdefMessage(tag, message).map { vcardString }
+    }
+    
+    /**
      * 寫入自訂資料到標籤
      */
     fun writeCustom(tag: Tag, content: NdefContent): Result<Unit> {
@@ -44,9 +89,9 @@ class NdefWriter @Inject constructor() {
             is NdefContent.Text -> createTextRecord(content.text, content.languageCode)
             is NdefContent.Uri -> createUriRecord(content.uri)
             is NdefContent.Json -> createJsonRecord(content.jsonString)
-            is NdefContent.WiFi -> createWiFiRecord(content)
             is NdefContent.VCard -> createVCardRecord(content)
             is NdefContent.Raw -> createRawRecord(content.data)
+            else -> return Result.failure(IllegalArgumentException("不支援的 NdefContent 類型"))
         }
         
         val message = NdefMessage(arrayOf(record))
@@ -62,40 +107,79 @@ class NdefWriter @Inject constructor() {
             
             if (ndef != null) {
                 // 標籤已格式化為 NDEF
-                ndef.connect()
-                
+                writeToNdefTag(ndef, message)
+            } else {
+                // 標籤未格式化，嘗試格式化
+                formatAndWriteTag(tag, message)
+            }
+        } catch (e: NfcException) {
+            Logger.nfc("WriteMessage", "NFC 操作失敗: ${e.message}", e)
+            Result.failure(e)
+        } catch (e: IOException) {
+            Logger.nfc("WriteMessage", "IO 錯誤: ${e.message}", e)
+            Result.failure(TagConnectionException("標籤連接失敗", e))
+        } catch (e: FormatException) {
+            Logger.nfc("WriteMessage", "格式錯誤: ${e.message}", e)
+            Result.failure(TagFormatException("標籤格式化失敗", e))
+        } catch (e: Exception) {
+            Logger.nfc("WriteMessage", "未知錯誤: ${e.message}", e)
+            Result.failure(TagWriteException("寫入失敗", e))
+        }
+    }
+    
+    /**
+     * 寫入到已格式化的 NDEF 標籤
+     */
+    private fun writeToNdefTag(ndef: Ndef, message: NdefMessage): Result<Unit> {
+        return try {
+            ndef.connect()
+            try {
                 if (!ndef.isWritable) {
-                    ndef.close()
-                    return Result.failure(IOException("標籤不可寫入"))
+                    throw TagNotWritableException()
                 }
                 
-                if (ndef.maxSize < message.toByteArray().size) {
-                    ndef.close()
-                    return Result.failure(IOException("標籤容量不足"))
+                val messageSize = message.toByteArray().size
+                if (ndef.maxSize < messageSize) {
+                    throw TagInsufficientSpaceException(messageSize, ndef.maxSize)
                 }
                 
                 ndef.writeNdefMessage(message)
-                ndef.close()
+                Logger.nfc("WriteToNdef", "成功寫入 $messageSize bytes")
                 Result.success(Unit)
-            } else {
-                // 標籤未格式化，嘗試格式化
-                val ndefFormatable = NdefFormatable.get(tag)
-                    ?: return Result.failure(IOException("標籤不支援 NDEF"))
-                
-                ndefFormatable.connect()
-                ndefFormatable.format(message)
-                ndefFormatable.close()
-                Result.success(Unit)
+            } finally {
+                try {
+                    ndef.close()
+                } catch (e: Exception) {
+                    Logger.w("關閉 NDEF 連接時發生錯誤: ${e.message}", e)
+                }
             }
-        } catch (e: IOException) {
-            e.printStackTrace()
-            Result.failure(e)
-        } catch (e: FormatException) {
-            e.printStackTrace()
-            Result.failure(e)
         } catch (e: Exception) {
-            e.printStackTrace()
-            Result.failure(e)
+            throw e
+        }
+    }
+    
+    /**
+     * 格式化並寫入標籤
+     */
+    private fun formatAndWriteTag(tag: Tag, message: NdefMessage): Result<Unit> {
+        return try {
+            val ndefFormatable = NdefFormatable.get(tag)
+                ?: throw TagFormatException("標籤不支援 NDEF 格式化")
+            
+            ndefFormatable.connect()
+            try {
+                ndefFormatable.format(message)
+                Logger.nfc("FormatAndWrite", "成功格式化並寫入標籤")
+                Result.success(Unit)
+            } finally {
+                try {
+                    ndefFormatable.close()
+                } catch (e: Exception) {
+                    Logger.w("關閉 NdefFormatable 連接時發生錯誤: ${e.message}", e)
+                }
+            }
+        } catch (e: Exception) {
+            throw e
         }
     }
     
@@ -142,15 +226,6 @@ class NdefWriter @Inject constructor() {
     }
     
     /**
-     * 建立 Wi-Fi Record (簡易版本)
-     */
-    private fun createWiFiRecord(wifi: NdefContent.WiFi): NdefRecord {
-        // 這是簡化版本，實際 Wi-Fi NDEF 格式較複雜
-        val wifiString = "WIFI:S:${wifi.ssid};T:${wifi.securityType.name};P:${wifi.password ?: ""};;"
-        return createTextRecord(wifiString)
-    }
-    
-    /**
      * 建立 vCard Record
      */
     private fun createVCardRecord(vcard: NdefContent.VCard): NdefRecord {
@@ -192,52 +267,6 @@ class NdefWriter @Inject constructor() {
      * 匹配 URI 前綴
      */
     private fun matchUriPrefix(uri: String): Pair<Int, String> {
-        val prefixes = mapOf(
-            0x01 to "http://www.",
-            0x02 to "https://www.",
-            0x03 to "http://",
-            0x04 to "https://",
-            0x05 to "tel:",
-            0x06 to "mailto:",
-            0x07 to "ftp://anonymous:anonymous@",
-            0x08 to "ftp://ftp.",
-            0x09 to "ftps://",
-            0x0A to "sftp://",
-            0x0B to "smb://",
-            0x0C to "nfs://",
-            0x0D to "ftp://",
-            0x0E to "dav://",
-            0x0F to "news:",
-            0x10 to "telnet://",
-            0x11 to "imap:",
-            0x12 to "rtsp://",
-            0x13 to "urn:",
-            0x14 to "pop:",
-            0x15 to "sip:",
-            0x16 to "sips:",
-            0x17 to "tftp:",
-            0x18 to "btspp://",
-            0x19 to "btl2cap://",
-            0x1A to "btgoep://",
-            0x1B to "tcpobex://",
-            0x1C to "irdaobex://",
-            0x1D to "file://",
-            0x1E to "urn:epc:id:",
-            0x1F to "urn:epc:tag:",
-            0x20 to "urn:epc:pat:",
-            0x21 to "urn:epc:raw:",
-            0x22 to "urn:epc:",
-            0x23 to "urn:nfc:"
-        )
-        
-        for ((code, prefix) in prefixes) {
-            if (uri.startsWith(prefix, ignoreCase = true)) {
-                return code to uri.substring(prefix.length)
-            }
-        }
-        
-        // 無匹配前綴
-        return 0x00 to uri
+        return UriPrefixConstants.matchUriPrefix(uri)
     }
 }
-

@@ -1,11 +1,18 @@
 package com.wuzuan.nfcdarktoolkit.ui.write
 
+import android.Manifest
+import android.app.Activity
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.Bundle
+import android.provider.ContactsContract
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
-import androidx.core.widget.addTextChangedListener
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -28,11 +35,67 @@ class WriteProfessionalFragment : Fragment() {
     private lateinit var spinnerCategory: Spinner
     private lateinit var spinnerType: Spinner
     private lateinit var etInput: EditText
+    private lateinit var etWifiPassword: EditText
+    private lateinit var etSmsPhone: EditText
+    private lateinit var btnPickContact: Button
+    private lateinit var btnPickLocation: Button
     private lateinit var tvHint: TextView
-    private lateinit var tvPreview: TextView
     private lateinit var btnWrite: Button
     private lateinit var progressBar: ProgressBar
     
+    private lateinit var layoutContactInput: LinearLayout
+    private lateinit var etContactName: EditText
+    private lateinit var etContactPhone: EditText
+    private lateinit var etContactEmail: EditText
+    
+    private val pickContactLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.let { contactUri ->
+                val cursor = requireActivity().contentResolver.query(contactUri, null, null, null, null)
+                cursor?.use { 
+                    if (it.moveToFirst()) {
+                        val nameIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)
+                        val phoneIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER)
+                        val emailCursor = requireActivity().contentResolver.query(
+                            ContactsContract.CommonDataKinds.Email.CONTENT_URI,
+                            null,
+                            ContactsContract.CommonDataKinds.Email.CONTACT_ID + " = ?",
+                            arrayOf(it.getString(it.getColumnIndex(ContactsContract.Contacts._ID))),
+                            null
+                        )
+                        emailCursor?.use {
+                            if (it.moveToFirst()) {
+                                val emailIndex = it.getColumnIndex(ContactsContract.CommonDataKinds.Email.DATA)
+                                val email = it.getString(emailIndex)
+                                etContactEmail.setText(email)
+                            }
+                        }
+                        val name = it.getString(nameIndex)
+                        val phone = it.getString(phoneIndex)
+                        etContactName.setText(name)
+                        etContactPhone.setText(phone)
+                    }
+                }
+            }
+        }
+    }
+    
+    private val pickLocationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.let { locationUri ->
+                etInput.setText(locationUri.toString())
+            }
+        }
+    }
+    
+    private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+        if (isGranted) {
+            launchContactPicker()
+        } else {
+            Snackbar.make(requireView(), "需要聯絡人權限才能選擇聯絡人", Snackbar.LENGTH_LONG).show()
+        }
+    }
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -54,14 +117,46 @@ class WriteProfessionalFragment : Fragment() {
         spinnerCategory = view.findViewById(R.id.spinner_category)
         spinnerType = view.findViewById(R.id.spinner_type)
         etInput = view.findViewById(R.id.et_input)
+        etWifiPassword = view.findViewById(R.id.et_wifi_password)
+        etSmsPhone = view.findViewById(R.id.et_sms_phone)
+        btnPickContact = view.findViewById(R.id.btn_pick_contact)
+        btnPickLocation = view.findViewById(R.id.btn_pick_location)
         tvHint = view.findViewById(R.id.tv_hint)
-        tvPreview = view.findViewById(R.id.tv_preview)
         btnWrite = view.findViewById(R.id.btn_write_pro)
         progressBar = view.findViewById(R.id.progress_write_pro)
         
-        etInput.addTextChangedListener {
-            updatePreview()
+        layoutContactInput = view.findViewById(R.id.layout_contact_input)
+        etContactName = view.findViewById(R.id.et_contact_name)
+        etContactPhone = view.findViewById(R.id.et_contact_phone)
+        etContactEmail = view.findViewById(R.id.et_contact_email)
+        
+        btnPickContact.setOnClickListener {
+            when {
+                ContextCompat.checkSelfPermission(
+                    requireContext(),
+                    Manifest.permission.READ_CONTACTS
+                ) == PackageManager.PERMISSION_GRANTED -> {
+                    launchContactPicker()
+                }
+                else -> {
+                    requestPermissionLauncher.launch(Manifest.permission.READ_CONTACTS)
+                }
+            }
         }
+        
+        btnPickLocation.setOnClickListener {
+            launchLocationPicker()
+        }
+    }
+    
+    private fun launchContactPicker() {
+        val intent = Intent(Intent.ACTION_PICK, ContactsContract.CommonDataKinds.Phone.CONTENT_URI)
+        pickContactLauncher.launch(intent)
+    }
+    
+    private fun launchLocationPicker() {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=0,0(地點)"))
+        pickLocationLauncher.launch(intent)
     }
     
     private fun setupCategorySpinner() {
@@ -87,19 +182,21 @@ class WriteProfessionalFragment : Fragment() {
     
     private fun updateTypeSpinner(category: String) {
         val types = WriteType.getCategories()[category] ?: emptyList()
-        val typeNames = types.map { it.displayName }
         
-        val typeAdapter = ArrayAdapter(
-            requireContext(),
-            android.R.layout.simple_spinner_item,
-            typeNames
-        )
-        typeAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        val items = types.map { type ->
+            IconSpinnerItem(
+                text = type.displayName,
+                iconRes = type.getIconResource(),
+                value = type
+            )
+        }
+        
+        val typeAdapter = IconSpinnerAdapter(requireContext(), items)
         spinnerType.adapter = typeAdapter
         
         spinnerType.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val selectedType = types[position]
+                val selectedType = items[position].value ?: return
                 viewModel.setWriteType(selectedType)
                 updateInputHint(selectedType)
             }
@@ -112,49 +209,14 @@ class WriteProfessionalFragment : Fragment() {
         val hint = SocialUrlBuilder.getPlaceholder(type)
         tvHint.text = hint
         etInput.hint = hint
-        updatePreview()
-    }
-    
-    private fun updatePreview() {
-        val input = etInput.text.toString()
-        if (input.isBlank()) {
-            tvPreview.text = "預覽：\n（輸入內容後顯示）"
-            return
-        }
         
-        val type = viewModel.selectedType.value
-        val preview = when (type) {
-            WriteType.TEXT -> "將寫入文字：\n$input"
-            WriteType.URL -> "將寫入網址：\n$input"
-            WriteType.SEARCH -> "將寫入搜尋：\nhttps://www.google.com/search?q=$input"
-            
-            WriteType.SOCIAL_DISCORD,
-            WriteType.SOCIAL_INSTAGRAM,
-            WriteType.SOCIAL_FACEBOOK,
-            WriteType.SOCIAL_LINE,
-            WriteType.SOCIAL_TELEGRAM,
-            WriteType.SOCIAL_TWITTER,
-            WriteType.SOCIAL_YOUTUBE,
-            WriteType.SOCIAL_TIKTOK -> {
-                val url = SocialUrlBuilder.buildUrl(type, input)
-                "將寫入 ${type.displayName}：\n$url"
-            }
-            
-            WriteType.VIDEO -> "將寫入影片連結：\n$input"
-            WriteType.FILE -> "將寫入檔案連結：\n$input"
-            WriteType.APPLICATION -> "將啟動應用程式：\nmarket://details?id=$input"
-            WriteType.MAIL -> "將寫入 Email：\nmailto:$input"
-            WriteType.CONTACT -> "將寫入聯絡人：\n$input"
-            WriteType.PHONE -> "將撥打電話：\ntel:$input"
-            WriteType.SMS -> "將發送簡訊：\nsms:?body=$input"
-            WriteType.LOCATION -> "將開啟地圖：\ngeo:$input"
-            WriteType.ADDRESS -> "將搜尋地址：\ngeo:0,0?q=$input"
-            WriteType.BITCOIN -> "將開啟錢包：\nbitcoin:$input"
-            WriteType.BLUETOOTH -> "藍牙裝置：\n$input"
-            WriteType.WIFI -> "WiFi 網路：\n$input"
-        }
+        layoutContactInput.visibility = if (type == WriteType.CONTACT) View.VISIBLE else View.GONE
+        etInput.visibility = if (type == WriteType.CONTACT) View.GONE else View.VISIBLE
         
-        tvPreview.text = "預覽：\n$preview"
+        btnPickLocation.visibility = if (type == WriteType.LOCATION) View.VISIBLE else View.GONE
+        btnPickContact.visibility = if (type == WriteType.CONTACT) View.VISIBLE else View.GONE
+        etSmsPhone.visibility = if (type == WriteType.SMS) View.VISIBLE else View.GONE
+        etWifiPassword.visibility = if (type == WriteType.WIFI) View.VISIBLE else View.GONE
     }
     
     private fun setupObservers() {
@@ -178,6 +240,11 @@ class WriteProfessionalFragment : Fragment() {
                             btnWrite.text = "靠近標籤以寫入"
                             Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG).show()
                             etInput.text?.clear()
+                            etWifiPassword.text?.clear()
+                            etSmsPhone.text?.clear()
+                            etContactName.text?.clear()
+                            etContactPhone.text?.clear()
+                            etContactEmail.text?.clear()
                         }
                         is WriteProfessionalState.Error -> {
                             progressBar.visibility = View.GONE
@@ -211,11 +278,12 @@ class WriteProfessionalFragment : Fragment() {
     
     private fun handleWrite(tag: android.nfc.Tag) {
         val input = etInput.text.toString()
-        if (input.isBlank()) {
-            Snackbar.make(requireView(), "請輸入內容", Snackbar.LENGTH_SHORT).show()
-            return
-        }
+        val wifiPassword = etWifiPassword.text.toString()
+        val smsPhone = etSmsPhone.text.toString()
+        val contactName = etContactName.text.toString()
+        val contactPhone = etContactPhone.text.toString()
+        val contactEmail = etContactEmail.text.toString()
         
-        viewModel.writeToTag(tag, input)
+        viewModel.writeToTag(tag, input, wifiPassword, smsPhone, contactName, contactPhone, contactEmail)
     }
 }

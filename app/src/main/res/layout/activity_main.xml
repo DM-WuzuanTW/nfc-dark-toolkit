@@ -6,6 +6,19 @@
     android:layout_height="match_parent"
     android:background="@color/color_bg">
 
+    <!-- Ad Banner Container -->
+    <FrameLayout
+        android:id="@+id/ad_banner_container"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+        
+        <include layout="@layout/ad_banner" />
+        
+    </FrameLayout>
+
     <!-- Navigation Host Fragment -->
     <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nav_host_fragment"
@@ -13,10 +26,10 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:defaultNavHost="true"
+        app:layout_constraintTop_toBottomOf="@id/ad_banner_container"
         app:layout_constraintBottom_toTopOf="@id/bottom_nav"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
         app:navGraph="@navigation/nav_graph" />
 
     <!-- Bottom Navigation -->
@@ -31,4 +44,3 @@
         app:menu="@menu/bottom_nav_menu" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-

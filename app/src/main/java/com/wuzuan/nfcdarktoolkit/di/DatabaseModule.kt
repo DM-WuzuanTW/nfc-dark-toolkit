@@ -2,6 +2,8 @@ package com.wuzuan.nfcdarktoolkit.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.wuzuan.nfcdarktoolkit.data.local.db.AppDatabase
 import com.wuzuan.nfcdarktoolkit.data.local.db.HistoryDao
 import dagger.Module
@@ -28,7 +30,12 @@ object DatabaseModule {
             AppDatabase::class.java,
             AppDatabase.DATABASE_NAME
         )
-            .fallbackToDestructiveMigration()
+            .addCallback(object : RoomDatabase.Callback() {
+                override fun onCreate(db: SupportSQLiteDatabase) {
+                    super.onCreate(db)
+                    // 可以在這裡添加初始化數據
+                }
+            })
             .build()
     }
     

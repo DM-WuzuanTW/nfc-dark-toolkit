@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">NFC Dark Toolkit</string>
+    <string name="app_name">數位名片</string>
     
     <!-- Bottom Navigation -->
     <string name="nav_scan">掃描</string>
@@ -20,33 +20,33 @@
     <string name="copy">複製</string>
     <string name="close">關閉</string>
     
-    <!-- NFC Status -->
-    <string name="nfc_not_supported">您的裝置不支援 NFC 功能</string>
-    <string name="nfc_disabled">NFC 未開啟</string>
-    <string name="nfc_disabled_message">請開啟 NFC 功能以使用此應用程式</string>
+    <!-- Digital Business Card Status -->
+    <string name="nfc_not_supported">您的裝置不支援數位名片功能</string>
+    <string name="nfc_disabled">數位名片功能未開啟</string>
+    <string name="nfc_disabled_message">請開啟數位名片功能以使用此應用程式</string>
     <string name="nfc_go_to_settings">前往設定</string>
-    <string name="nfc_enabled">NFC 已啟用</string>
-    <string name="nfc_ready">準備掃描 NFC 標籤...</string>
+    <string name="nfc_enabled">數位名片功能已啟用</string>
+    <string name="nfc_ready">將手機靠近數位名片</string>
     <string name="nfc_reading">讀取中...</string>
     <string name="nfc_writing">寫入中...</string>
-    <string name="scan_tag_detected">偵測到 NFC 標籤</string>
+    <string name="scan_tag_detected">偵測到數位名片</string>
     
     <!-- Scan Screen -->
-    <string name="scan_title">NFC 標籤掃描</string>
-    <string name="scan_instruction">請將手機靠近 NFC 標籤</string>
-    <string name="scan_tag_info">標籤資訊</string>
-    <string name="scan_tag_id">標籤 ID</string>
-    <string name="scan_tag_type">標籤類型</string>
+    <string name="scan_title">數位名片掃描</string>
+    <string name="scan_instruction">請將手機靠近數位名片</string>
+    <string name="scan_tag_info">數位名片資訊</string>
+    <string name="scan_tag_id">數位名片 ID</string>
+    <string name="scan_tag_type">數位名片類型</string>
     <string name="scan_tag_tech">支援技術</string>
     <string name="scan_tag_size">容量</string>
     <string name="scan_tag_writable">可寫入</string>
     <string name="scan_tag_readonly">唯讀</string>
     <string name="scan_ndef_content">NDEF 內容</string>
-    <string name="scan_no_ndef">此標籤不包含 NDEF 資料</string>
-    <string name="scan_empty_tag">空標籤</string>
+    <string name="scan_no_ndef">此數位名片不包含 NDEF 資料</string>
+    <string name="scan_empty_tag">空數位名片</string>
     
     <!-- Write Screen -->
-    <string name="write_title">寫入資料到 NFC 標籤</string>
+    <string name="write_title">寫入資料到數位名片</string>
     <string name="write_select_type">選擇資料類型</string>
     <string name="write_type_text">純文字</string>
     <string name="write_type_url">網址 (URL)</string>
@@ -55,11 +55,11 @@
     <string name="write_type_json">自訂 JSON</string>
     <string name="write_input_text">輸入文字內容</string>
     <string name="write_input_url">輸入網址</string>
-    <string name="write_tap_to_write">靠近標籤以寫入</string>
+    <string name="write_tap_to_write">靠近數位名片以寫入</string>
     <string name="write_success">寫入成功</string>
     <string name="write_failed">寫入失敗</string>
-    <string name="write_tag_not_writable">此標籤不可寫入</string>
-    <string name="write_insufficient_space">標籤容量不足</string>
+    <string name="write_tag_not_writable">此數位名片不可寫入</string>
+    <string name="write_insufficient_space">數位名片容量不足</string>
     
     <!-- Write Types - Social Networks -->
     <string name="write_social_discord">Discord</string>
@@ -142,7 +142,7 @@
     <string name="settings_theme_dark">深色主題</string>
     <string name="settings_theme_light">淺色主題</string>
     <string name="settings_auto_save_history">自動儲存記錄</string>
-    <string name="settings_auto_save_history_summary">自動記錄所有 NFC 操作</string>
+    <string name="settings_auto_save_history_summary">自動記錄所有數位名片操作</string>
     <string name="settings_default_write_format">預設寫入格式</string>
     <string name="settings_security">安全性</string>
     <string name="settings_safe_mode">安全模式</string>
@@ -152,27 +152,28 @@
     <string name="settings_author">作者</string>
     <string name="settings_author_name">WuzuanTW</string>
     <string name="settings_license">授權</string>
-    
+    <string name="about_digital_card_title">關於數位名片</string>
+
     <!-- Tag Operations -->
-    <string name="tag_op_format">格式化標籤</string>
-    <string name="tag_op_format_warning">格式化將清除標籤上的所有資料，此操作無法復原。確定要繼續嗎？</string>
+    <string name="tag_op_format">格式化數位名片</string>
+    <string name="tag_op_format_warning">格式化將清除數位名片上的所有資料，此操作無法復原。確定要繼續嗎？</string>
     <string name="tag_op_format_success">格式化成功</string>
     <string name="tag_op_format_failed">格式化失敗</string>
-    <string name="tag_op_lock">鎖定標籤（設為唯讀）</string>
-    <string name="tag_op_lock_warning">鎖定後標籤將永久變為唯讀，此操作不可逆。確定要繼續嗎？</string>
+    <string name="tag_op_lock">鎖定數位名片（設為唯讀）</string>
+    <string name="tag_op_lock_warning">鎖定後數位名片將永久變為唯讀，此操作不可逆。確定要繼續嗎？</string>
     <string name="tag_op_lock_success">鎖定成功</string>
     <string name="tag_op_lock_failed">鎖定失敗</string>
-    <string name="tag_op_clone">複製標籤</string>
-    <string name="tag_op_clone_step1">步驟 1：靠近來源標籤以讀取資料</string>
-    <string name="tag_op_clone_step2">步驟 2：靠近目標標籤以寫入資料</string>
-    <string name="tag_op_clone_read_success">來源標籤讀取成功</string>
+    <string name="tag_op_clone">複製數位名片</string>
+    <string name="tag_op_clone_step1">步驟 1：靠近來源數位名片以讀取資料</string>
+    <string name="tag_op_clone_step2">步驟 2：靠近目標數位名片以寫入資料</string>
+    <string name="tag_op_clone_read_success">來源數位名片讀取成功</string>
     <string name="tag_op_clone_write_success">複製成功</string>
     <string name="tag_op_clone_failed">複製失敗</string>
     
     <!-- Errors -->
     <string name="error_unknown">未知錯誤</string>
-    <string name="error_nfc_disabled">NFC 未啟用</string>
-    <string name="error_tag_lost">標籤連接中斷</string>
+    <string name="error_nfc_disabled">數位名片功能未啟用</string>
+    <string name="error_tag_lost">數位名片連接中斷</string>
     <string name="error_io">讀寫錯誤</string>
     <string name="error_format">格式錯誤</string>
     <string name="error_not_supported">不支援的操作</string>
@@ -180,7 +181,6 @@
     
     <!-- Legal Notice -->
     <string name="legal_notice_title">法律聲明</string>
-    <string name="legal_notice_message">本應用程式僅供合法用途使用。\n\n禁止使用本應用程式複製或模擬未經授權的 NFC 卡片，包括但不限於：\n• 門禁卡\n• 金融卡\n• 交通卡\n• 其他受保護的智慧卡\n\n使用者需自行承擔所有法律責任。</string>
+    <string name="legal_notice_message">本應用程式僅供合法用途使用。\n\n禁止使用本應用程式複製或模擬未經授權的數位名片，包括但不限於：\n• 門禁卡\n• 金融卡\n• 交通卡\n• 其他受保護的智慧卡\n\n使用者需自行承擔所有法律責任。</string>
     <string name="legal_notice_accept">我已閱讀並同意</string>
 </resources>
-

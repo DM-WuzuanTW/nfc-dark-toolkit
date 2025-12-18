@@ -14,20 +14,14 @@
         android:id="@+id/editFragment"
         android:icon="@drawable/ic_edit"
         android:title="編輯" />
-    
+        
     <item
-        android:id="@+id/otherFragment"
+        android:id="@+id/toolsFragment"
         android:icon="@drawable/ic_other"
-        android:title="其他" />
-    
-    <item
-        android:id="@+id/historyFragment"
-        android:icon="@drawable/ic_history"
-        android:title="歷史" />
+        android:title="工具" />
     
     <item
         android:id="@+id/settingsFragment"
         android:icon="@drawable/ic_settings"
-        android:title="設置" />
+        android:title="關於" />
 </menu>
-

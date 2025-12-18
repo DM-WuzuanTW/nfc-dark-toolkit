@@ -7,7 +7,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AnimationUtils
 import android.widget.*
+import androidx.core.widget.NestedScrollView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -18,6 +20,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.wuzuan.nfcdarktoolkit.MainActivity
 import com.wuzuan.nfcdarktoolkit.R
 import com.wuzuan.nfcdarktoolkit.nfc.TagOperations
+import com.wuzuan.nfcdarktoolkit.utils.NdefParser
 import com.wuzuan.nfcdarktoolkit.utils.TagInfoHelper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -37,6 +40,9 @@ class ScanFragmentEnhanced : Fragment() {
     
     private val viewModel: ScanViewModel by viewModels()
     
+    private lateinit var layoutIdle: LinearLayout
+    private lateinit var scrollViewContent: NestedScrollView
+    
     private lateinit var tvStatus: TextView
     private lateinit var progressBar: ProgressBar
     private lateinit var cardTagInfo: LinearLayout
@@ -53,9 +59,11 @@ class ScanFragmentEnhanced : Fragment() {
     private lateinit var tvNdefContent: TextView
     
     private lateinit var btnCopyContent: Button
-    private lateinit var btnCloneTag: Button
     private lateinit var btnFormatTag: Button
-    
+    private lateinit var idleIcon: ImageView
+    private lateinit var radarScanView: ImageView
+    private lateinit var idleSubText: TextView
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -71,10 +79,24 @@ class ScanFragmentEnhanced : Fragment() {
         setupObservers()
         setupNfcListener()
         setupActionButtons()
+        startWelcomeAnimation()
+    }
+
+    private fun startWelcomeAnimation() {
+        idleIcon.startAnimation(AnimationUtils.loadAnimation(context, R.anim.fade_in_scale))
+        radarScanView.startAnimation(AnimationUtils.loadAnimation(context, R.anim.radar_scan))
+        tvStatus.startAnimation(AnimationUtils.loadAnimation(context, R.anim.fade_in))
+        idleSubText.startAnimation(AnimationUtils.loadAnimation(context, R.anim.fade_in))
     }
     
     private fun initViews(view: View) {
+        layoutIdle = view.findViewById(R.id.layout_idle_scan)
+        scrollViewContent = view.findViewById(R.id.scroll_view_scan_content)
+        
+        idleIcon = view.findViewById(R.id.idle_icon)
+        radarScanView = view.findViewById(R.id.radar_scan_view)
         tvStatus = view.findViewById(R.id.tv_status_scan)
+        idleSubText = view.findViewById(R.id.idle_sub_text)
         progressBar = view.findViewById(R.id.progress_scan)
         cardTagInfo = view.findViewById(R.id.card_tag_info_scan)
         cardNdefContent = view.findViewById(R.id.card_ndef_content)
@@ -90,7 +112,6 @@ class ScanFragmentEnhanced : Fragment() {
         tvNdefContent = view.findViewById(R.id.tv_ndef_content_scan)
         
         btnCopyContent = view.findViewById(R.id.btn_copy_content)
-        btnCloneTag = view.findViewById(R.id.btn_clone_tag)
         btnFormatTag = view.findViewById(R.id.btn_format_tag)
     }
     
@@ -126,10 +147,6 @@ class ScanFragmentEnhanced : Fragment() {
             copyContentToClipboard()
         }
         
-        btnCloneTag.setOnClickListener {
-            startCloning()
-        }
-        
         btnFormatTag.setOnClickListener {
             showFormatConfirmDialog()
         }
@@ -138,31 +155,25 @@ class ScanFragmentEnhanced : Fragment() {
     private fun updateUI(state: ScanUiState) {
         when (state) {
             is ScanUiState.Idle -> {
+                layoutIdle.visibility = View.VISIBLE
+                scrollViewContent.visibility = View.GONE
                 progressBar.visibility = View.GONE
                 tvStatus.text = getString(R.string.nfc_ready)
-                cardTagInfo.visibility = View.GONE
-                cardNdefContent.visibility = View.GONE
-                layoutActions.visibility = View.GONE
-                tvActionsLabel.visibility = View.GONE
             }
             is ScanUiState.Reading -> {
+                layoutIdle.visibility = View.VISIBLE
+                scrollViewContent.visibility = View.GONE
                 progressBar.visibility = View.VISIBLE
                 tvStatus.text = getString(R.string.nfc_reading)
-                cardTagInfo.visibility = View.GONE
-                cardNdefContent.visibility = View.GONE
-                layoutActions.visibility = View.GONE
             }
             is ScanUiState.Success -> {
-                progressBar.visibility = View.GONE
-                tvStatus.text = getString(R.string.scan_tag_detected)
-                cardTagInfo.visibility = View.VISIBLE
-                layoutActions.visibility = View.VISIBLE
-                tvActionsLabel.visibility = View.VISIBLE
+                layoutIdle.visibility = View.GONE
+                scrollViewContent.visibility = View.VISIBLE
                 
                 val tagInfo = state.tagInfo
                 
                 // 顯示標籤資訊（參考 NFC Tools）
-                tvManufacturer.text = state.rawTag?.let { TagInfoHelper.getManufacturer(it) } ?: "未知"
+                tvManufacturer.text = "鑽石託管"
                 tvTagId.text = tagInfo.id
                 tvTagType.text = TagInfoHelper.getDetailedTagModel(state.rawTag!!, tagInfo.type)
                 tvTechList.text = tagInfo.techList.joinToString(", ")
@@ -175,19 +186,16 @@ class ScanFragmentEnhanced : Fragment() {
                 // 顯示 NDEF 內容
                 if (tagInfo.ndefRecords.isNotEmpty()) {
                     cardNdefContent.visibility = View.VISIBLE
-                    tvNdefContent.text = tagInfo.ndefRecords.joinToString("\n\n") { record ->
-                        "類型: ${record.recordType}\n內容: ${record.payload}"
-                    }
+                    tvNdefContent.text = NdefParser.parse(tagInfo.ndefRecords)
                 } else {
                     cardNdefContent.visibility = View.GONE
                 }
             }
             is ScanUiState.Error -> {
+                layoutIdle.visibility = View.VISIBLE
+                scrollViewContent.visibility = View.GONE
                 progressBar.visibility = View.GONE
                 tvStatus.text = "錯誤: ${state.message}"
-                cardTagInfo.visibility = View.GONE
-                cardNdefContent.visibility = View.GONE
-                layoutActions.visibility = View.GONE
                 
                 Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG).show()
             }
@@ -212,29 +220,6 @@ class ScanFragmentEnhanced : Fragment() {
         clipboard.setPrimaryClip(ClipData.newPlainText("NFC Tag Info", content))
         
         Snackbar.make(requireView(), "已複製到剪貼簿", Snackbar.LENGTH_SHORT).show()
-    }
-    
-    private fun startCloning() {
-        val state = viewModel.uiState.value
-        if (state !is ScanUiState.Success || state.rawTag == null) return
-        
-        val result = cloneHelper.startCloning(state.rawTag)
-        
-        if (result.isSuccess) {
-            Snackbar.make(
-                requireView(),
-                result.getOrNull() ?: "請靠近目標標籤",
-                Snackbar.LENGTH_INDEFINITE
-            ).setAction("取消") {
-                cloneHelper.cancelCloning()
-            }.show()
-        } else {
-            Snackbar.make(
-                requireView(),
-                result.exceptionOrNull()?.message ?: "讀取失敗",
-                Snackbar.LENGTH_LONG
-            ).show()
-        }
     }
     
     private fun handleCloneTarget(tag: android.nfc.Tag) {
@@ -285,4 +270,3 @@ class ScanFragmentEnhanced : Fragment() {
         }
     }
 }
-

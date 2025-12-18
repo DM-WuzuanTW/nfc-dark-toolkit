@@ -41,27 +41,11 @@ enum class WriteType(val displayName: String, val category: String) {
     
     companion object {
         fun getCategories(): Map<String, List<WriteType>> {
-            return mapOf(
-                "基本" to listOf(TEXT, URL, SEARCH),
-                "社交網路" to listOf(
-                    SOCIAL_DISCORD,
-                    SOCIAL_INSTAGRAM,
-                    SOCIAL_FACEBOOK,
-                    SOCIAL_LINE,
-                    SOCIAL_TELEGRAM,
-                    SOCIAL_TWITTER,
-                    SOCIAL_YOUTUBE,
-                    SOCIAL_TIKTOK
-                ),
-                "通訊" to listOf(MAIL, CONTACT, PHONE, SMS),
-                "位置" to listOf(LOCATION, ADDRESS),
-                "媒體" to listOf(VIDEO, FILE, APPLICATION),
-                "其他" to listOf(BITCOIN, BLUETOOTH, WIFI)
-            )
+            return values().groupBy { it.category }
         }
         
         fun getCategoryList(): List<String> {
-            return listOf("基本", "社交網路", "通訊", "位置", "媒體", "其他")
+            return values().map { it.category }.distinct()
         }
     }
 }

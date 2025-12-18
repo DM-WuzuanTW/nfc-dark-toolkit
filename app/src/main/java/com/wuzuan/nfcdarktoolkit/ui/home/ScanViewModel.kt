@@ -8,8 +8,8 @@ import com.wuzuan.nfcdarktoolkit.data.repository.SettingsRepository
 import com.wuzuan.nfcdarktoolkit.domain.model.ActionType
 import com.wuzuan.nfcdarktoolkit.domain.model.HistoryRecord
 import com.wuzuan.nfcdarktoolkit.domain.model.TagInfo
-import com.wuzuan.nfcdarktoolkit.nfc.NdefReader
-import com.wuzuan.nfcdarktoolkit.nfc.NfcManager
+import com.wuzuan.nfcdarktoolkit.domain.usecase.ReadTagUseCase
+import com.wuzuan.nfcdarktoolkit.utils.Logger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -23,8 +23,7 @@ import javax.inject.Inject
  */
 @HiltViewModel
 class ScanViewModel @Inject constructor(
-    private val nfcManager: NfcManager,
-    private val ndefReader: NdefReader,
+    private val readTagUseCase: ReadTagUseCase,
     private val historyRepository: HistoryRepository,
     private val settingsRepository: SettingsRepository
 ) : ViewModel() {
@@ -35,26 +34,25 @@ class ScanViewModel @Inject constructor(
     fun onTagDetected(tag: Tag) {
         viewModelScope.launch {
             try {
+                val tagId = tag.id.joinToString(":") { "%02X".format(it) }
+                Logger.nfc("ScanViewModel", "偵測到標籤: $tagId")
+                Logger.nfc("ScanViewModel", "標籤技術: ${tag.techList.joinToString()}")
+                
                 _uiState.value = ScanUiState.Reading
                 
-                // 解析標籤資訊
-                val tagInfo = nfcManager.parseTagInfo(tag)
-                
-                // 讀取 NDEF 資料
-                val ndefRecords = ndefReader.readNdefFromTag(tag)
-                val completeTagInfo = tagInfo.copy(ndefRecords = ndefRecords)
-                
-                _uiState.value = ScanUiState.Success(
-                    tagInfo = completeTagInfo,
-                    rawTag = tag
-                )
-                
-                // 儲存歷史記錄
-                saveHistory(completeTagInfo)
+                // 直接嘗試讀取，不做預先檢查
+                readTagUseCase(tag).onSuccess { tagInfo ->
+                    Logger.nfc("ScanViewModel", "標籤讀取成功: ${tagInfo.id}")
+                    _uiState.value = ScanUiState.Success(tagInfo, tag)
+                    saveHistory(tagInfo)
+                }.onFailure { exception ->
+                    Logger.e("標籤讀取失敗: ${exception.message}", exception)
+                    _uiState.value = ScanUiState.Error("讀取失敗: ${exception.message}")
+                }
                 
             } catch (e: Exception) {
-                e.printStackTrace()
-                _uiState.value = ScanUiState.Error(e.message ?: "未知錯誤")
+                Logger.e("處理標籤時發生異常: ${e.message}", e)
+                _uiState.value = ScanUiState.Error("處理標籤時發生錯誤: ${e.message}")
             }
         }
     }

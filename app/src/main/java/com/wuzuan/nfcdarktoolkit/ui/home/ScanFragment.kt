@@ -1,4 +1,4 @@
-package com.wuzuan.nfcdarktoolkit.ui.home
+﻿package com.wuzuan.nfcdarktoolkit.ui.home
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -85,11 +85,11 @@ class ScanFragment : Fragment() {
                 binding.tvTagType.text = state.tagInfo.type.name
                 binding.tvTechList.text = state.tagInfo.techList.joinToString(", ")
                 binding.tvWritable.text = if (state.tagInfo.isWritable) "可寫入" else "唯讀"
-                binding.tvSize.text = if (state.tagInfo.maxSize != null) 
-                    "${state.tagInfo.currentSize ?: 0} / ${state.tagInfo.maxSize} bytes" 
-                else "N/A"
-                
-                // 顯示 NDEF 內容
+                binding.tvSize.text = if (state.tagInfo.maxSize > 0) {
+                    "${state.tagInfo.maxSize} bytes"
+                } else {
+                    "N/A"
+                }
                 if (state.tagInfo.ndefRecords.isNotEmpty()) {
                     binding.tvNdefContent.visibility = View.VISIBLE
                     binding.tvNdefContent.text = state.tagInfo.ndefRecords.joinToString("\n\n") { record ->
@@ -112,4 +112,3 @@ class ScanFragment : Fragment() {
         _binding = null
     }
 }
-

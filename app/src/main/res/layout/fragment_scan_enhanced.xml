@@ -1,311 +1,347 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView 
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/color_bg"
-    android:fillViewport="true">
+    android:background="@color/color_bg">
 
+    <!-- Idle State Layout -->
     <LinearLayout
-        android:layout_width="match_parent"
+        android:id="@+id/layout_idle_scan"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="32dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:visibility="visible">
 
-        <!-- Title -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/scan_title"
-            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline1"
-            android:textColor="@color/text_primary" />
+        <FrameLayout
+            android:layout_width="120dp"
+            android:layout_height="120dp">
 
-        <!-- Status -->
+            <ImageView
+                android:id="@+id/radar_scan_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_scan" 
+                android:alpha="0.5"/>
+
+            <ImageView
+                android:id="@+id/idle_icon"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:src="@drawable/ic_scan"
+                app:tint="@color/text_primary" />
+
+        </FrameLayout>
+
         <TextView
             android:id="@+id/tv_status_scan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="24dp"
             android:text="@string/nfc_ready"
+            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+            android:textColor="@color/text_primary" />
+
+        <TextView
+            android:id="@+id/idle_sub_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="將手機背面靠近我們的產品即可感應"
+            android:gravity="center"
             android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
             android:textColor="@color/text_secondary" />
 
-        <!-- Progress -->
         <ProgressBar
             android:id="@+id/progress_scan"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="16dp"
-            android:visibility="gone"
-            tools:visibility="visible" />
+            android:layout_marginTop="24dp"
+            android:visibility="gone" />
 
-        <!-- Tag Info Card -->
+    </LinearLayout>
+
+    <!-- Scanned Content ScrollView -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll_view_scan_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:visibility="gone"
+        tools:visibility="gone">
+
         <LinearLayout
-            android:id="@+id/card_tag_info_scan"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@color/card_background"
             android:orientation="vertical"
-            android:padding="16dp"
-            android:visibility="gone"
-            tools:visibility="visible">
+            android:padding="16dp">
 
+            <!-- Title -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/scan_tag_info"
-                android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+                android:text="@string/scan_title"
+                android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline1"
                 android:textColor="@color/text_primary" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:background="@color/color_divider" />
-
-            <!-- Manufacturer -->
+            <!-- Tag Info Card -->
             <LinearLayout
+                android:id="@+id/card_tag_info_scan"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
+                android:layout_marginTop="16dp"
+                android:background="@color/card_background"
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="製造商"
-                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
-                    android:textColor="@color/text_secondary" />
-
-                <TextView
-                    android:id="@+id/tv_manufacturer"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
-                    android:textColor="@color/text_primary"
-                    tools:text="NXP Semiconductors" />
+                    android:text="@string/scan_tag_info"
+                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+                    android:textColor="@color/text_primary" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@color/color_divider" />
+
+                <!-- Manufacturer -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="製造商"
+                        android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
+                        android:textColor="@color/text_secondary" />
+
+                    <TextView
+                        android:id="@+id/tv_manufacturer"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
+                        android:textColor="@color/text_primary"
+                        tools:text="NXP Semiconductors" />
+
+                </LinearLayout>
+
+                <!-- Tag ID -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/scan_tag_id"
+                        android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
+                        android:textColor="@color/text_secondary" />
+
+                    <TextView
+                        android:id="@+id/tv_tag_id_scan"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="monospace"
+                        android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
+                        android:textColor="@color/text_primary"
+                        tools:text="04:E2:3C:AA:5B:28:80" />
+
+                </LinearLayout>
+
+                <!-- Tag Type -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/scan_tag_type"
+                        android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
+                        android:textColor="@color/text_secondary" />
+
+                    <TextView
+                        android:id="@+id/tv_tag_type_scan"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
+                        android:textColor="@color/text_primary"
+                        tools:text="NTAG 213" />
+
+                </LinearLayout>
+
+                <!-- Technologies -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/scan_tag_tech"
+                        android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
+                        android:textColor="@color/text_secondary" />
+
+                    <TextView
+                        android:id="@+id/tv_tech_list_scan"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
+                        android:textColor="@color/text_primary"
+                        tools:text="NfcA, Ndef" />
+
+                </LinearLayout>
+
+                <!-- Writable Status -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="狀態"
+                        android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
+                        android:textColor="@color/text_secondary" />
+
+                    <TextView
+                        android:id="@+id/tv_writable_scan"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
+                        android:textColor="@color/text_primary"
+                        tools:text="可寫入" />
+
+                </LinearLayout>
+
+                <!-- Size -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="@string/scan_tag_size"
+                        android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
+                        android:textColor="@color/text_secondary" />
+
+                    <TextView
+                        android:id="@+id/tv_size_scan"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
+                        android:textColor="@color/text_primary"
+                        tools:text="144 bytes" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
-            <!-- Tag ID -->
+            <!-- NDEF Content -->
             <LinearLayout
+                android:id="@+id/card_ndef_content"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
+                android:layout_marginTop="16dp"
+                android:background="@color/card_background"
+                android:orientation="vertical"
+                android:padding="16dp">
 
                 <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/scan_tag_id"
-                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
-                    android:textColor="@color/text_secondary" />
-
-                <TextView
-                    android:id="@+id/tv_tag_id_scan"
                     android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/scan_ndef_content"
+                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
+                    android:textColor="@color/text_primary" />
+
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="8dp"
+                    android:background="@color/color_divider" />
+
+                <TextView
+                    android:id="@+id/tv_ndef_content_scan"
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="monospace"
                     android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
                     android:textColor="@color/text_primary"
-                    tools:text="04:E2:3C:AA:5B:28:80" />
+                    tools:text="類型: TEXT\n內容: Hello World" />
 
             </LinearLayout>
 
-            <!-- Tag Type -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/scan_tag_type"
-                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
-                    android:textColor="@color/text_secondary" />
-
-                <TextView
-                    android:id="@+id/tv_tag_type_scan"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
-                    android:textColor="@color/text_primary"
-                    tools:text="NTAG 213" />
-
-            </LinearLayout>
-
-            <!-- Technologies -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/scan_tag_tech"
-                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
-                    android:textColor="@color/text_secondary" />
-
-                <TextView
-                    android:id="@+id/tv_tech_list_scan"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
-                    android:textColor="@color/text_primary"
-                    tools:text="NfcA, Ndef" />
-
-            </LinearLayout>
-
-            <!-- Writable Status -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="狀態"
-                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
-                    android:textColor="@color/text_secondary" />
-
-                <TextView
-                    android:id="@+id/tv_writable_scan"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
-                    android:textColor="@color/text_primary"
-                    tools:text="可寫入" />
-
-            </LinearLayout>
-
-            <!-- Size -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/scan_tag_size"
-                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body2"
-                    android:textColor="@color/text_secondary" />
-
-                <TextView
-                    android:id="@+id/tv_size_scan"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
-                    android:textColor="@color/text_primary"
-                    tools:text="144 bytes" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <!-- NDEF Content -->
-        <LinearLayout
-            android:id="@+id/card_ndef_content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:background="@color/card_background"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:visibility="gone"
-            tools:visibility="visible">
-
+            <!-- Actions (參考 NFC Tools) -->
             <TextView
+                android:id="@+id/tv_actions_label"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/scan_ndef_content"
+                android:layout_marginTop="24dp"
+                android:text="操作"
                 android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
                 android:textColor="@color/text_primary" />
 
-            <View
-                android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:background="@color/color_divider" />
-
-            <TextView
-                android:id="@+id/tv_ndef_content_scan"
+            <LinearLayout
+                android:id="@+id/layout_actions_scan"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:fontFamily="monospace"
-                android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Body1"
-                android:textColor="@color/text_primary"
-                tools:text="類型: TEXT\n內容: Hello World" />
+                android:layout_marginTop="8dp"
+                android:orientation="vertical">
+
+                <Button
+                    android:id="@+id/btn_copy_content"
+                    style="@style/Widget.NFCDarkToolkit.Button.Outlined"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="複製內容"
+                    android:textAllCaps="false" />
+
+                <Button
+                    android:id="@+id/btn_format_tag"
+                    style="@style/Widget.NFCDarkToolkit.Button.Danger"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="@string/tag_op_format"
+                    android:textAllCaps="false" />
+
+            </LinearLayout>
 
         </LinearLayout>
 
-        <!-- Actions (參考 NFC Tools) -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="操作"
-            android:textAppearance="@style/TextAppearance.NFCDarkToolkit.Headline2"
-            android:textColor="@color/text_primary"
-            android:visibility="gone"
-            android:id="@+id/tv_actions_label" />
+    </androidx.core.widget.NestedScrollView>
 
-        <LinearLayout
-            android:id="@+id/layout_actions_scan"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <Button
-                android:id="@+id/btn_copy_content"
-                style="@style/Widget.NFCDarkToolkit.Button.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="複製內容"
-                android:textAllCaps="false" />
-
-            <Button
-                android:id="@+id/btn_clone_tag"
-                style="@style/Widget.NFCDarkToolkit.Button.Outlined"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/tag_op_clone"
-                android:textAllCaps="false" />
-
-            <Button
-                android:id="@+id/btn_format_tag"
-                style="@style/Widget.NFCDarkToolkit.Button.Danger"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:text="@string/tag_op_format"
-                android:textAllCaps="false" />
-
-        </LinearLayout>
-
-    </LinearLayout>
-
-</androidx.core.widget.NestedScrollView>
-
+</androidx.constraintlayout.widget.ConstraintLayout>
