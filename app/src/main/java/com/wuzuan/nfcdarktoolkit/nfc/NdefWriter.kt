@@ -144,12 +144,35 @@ class NdefWriter @Inject constructor() {
                     throw TagNotWritableException()
                 }
                 
-                val messageSize = message.toByteArray().size
+                // --- 核心修改：保留現有的驗證簽名 (Preserve Auth) ---
+                // 1. 讀取當前內容
+                val existingMsg = try { ndef.ndefMessage } catch (e: Exception) { null }
+                
+                // 2. 檢查當前內容是否有簽名
+                val existingAuthRecord = existingMsg?.records?.find { 
+                    it.toMimeType() == "application/vnd.wuzuan.auth" 
+                }
+                
+                // 3. 檢查要寫入的新內容是否已經包含簽名 (如果是開發者模式寫入，這裡會已經有了)
+                val newHasAuth = message.records.any { 
+                    it.toMimeType() == "application/vnd.wuzuan.auth" 
+                }
+                
+                // 4. 如果舊的有簽名，但新的沒簽名 -> 把舊的補上去
+                var finalMessage = message
+                if (existingAuthRecord != null && !newHasAuth) {
+                    val newRecords = message.records + existingAuthRecord
+                    finalMessage = NdefMessage(newRecords)
+                    Logger.nfc("WriteToNdef", "檢測到舊的驗證簽名，已自動保留。")
+                }
+                // ------------------------------------------------
+                
+                val messageSize = finalMessage.toByteArray().size
                 if (ndef.maxSize < messageSize) {
                     throw TagInsufficientSpaceException(messageSize, ndef.maxSize)
                 }
                 
-                ndef.writeNdefMessage(message)
+                ndef.writeNdefMessage(finalMessage)
                 Logger.nfc("WriteToNdef", "成功寫入 $messageSize bytes")
                 Result.success(Unit)
             } finally {
@@ -276,13 +299,15 @@ class NdefWriter @Inject constructor() {
         return UriPrefixConstants.matchUriPrefix(uri)
     }
 
-    /**
-     * 附加簽名 Record (如果是開發者模式)
-     */
+
     fun addSignatureRecord(originalMessage: NdefMessage): NdefMessage {
-        // 簡單的簽名 Record
-        val authString = "diamondhost-verification-v1" // 這裡應該是加密後的數據
-        val authBytes = authString.toByteArray(Charset.forName("UTF-8"))
+        // Simulating "Encrypted" data 
+        // Real implementation would involve crypto libraries, but here we use a Base64 encoded hash-like string
+        // "DIAMOND HOST VERIFIED" -> Base64 or obfuscated
+        // Let's use a fixed complex hex string to look like a signature
+        val encryptedContent = "4449414D4F4E442D484F53542D5345435552452D32303235"
+        val authBytes = encryptedContent.toByteArray(Charset.forName("UTF-8"))
+        
         val authRecord = NdefRecord(
             NdefRecord.TNF_MIME_MEDIA,
             "application/vnd.wuzuan.auth".toByteArray(Charset.forName("US-ASCII")),
