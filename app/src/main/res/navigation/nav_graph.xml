@@ -19,17 +19,7 @@
         android:label="寫入"
         tools:layout="@layout/fragment_write_professional" />
 
-    <!-- 讀取編輯 -->
-    <fragment
-        android:id="@+id/editFragment"
-        android:name="com.wuzuan.nfcdarktoolkit.ui.edit.EditFragment"
-        android:label="編輯" />
 
-    <!-- 工具 -->
-    <fragment
-        android:id="@+id/toolsFragment"
-        android:name="com.wuzuan.nfcdarktoolkit.ui.tools.ToolsFragment"
-        android:label="工具" />
 
     <!-- 設置 -->
     <fragment
