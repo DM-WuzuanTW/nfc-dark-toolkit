@@ -39,13 +39,15 @@ class WriteProfessionalViewModel @Inject constructor(
             try {
                 _writeState.value = WriteProfessionalState.Writing
                 
+                val sign = com.wuzuan.nfcdarktoolkit.MainActivity.isDeveloperMode
+                
                 val result: Result<String> = when (_selectedType.value) {
-                    WriteType.WIFI -> ndefWriter.writeWifi(tag, input, wifiPassword)
-                    WriteType.SMS -> ndefWriter.writeSms(tag, smsPhone ?: "", input)
-                    WriteType.CONTACT -> ndefWriter.writeVCard(tag, contactName, contactPhone, contactEmail)
+                    WriteType.WIFI -> ndefWriter.writeWifi(tag, input, wifiPassword, sign = sign)
+                    WriteType.SMS -> ndefWriter.writeSms(tag, smsPhone ?: "", input, sign = sign)
+                    WriteType.CONTACT -> ndefWriter.writeVCard(tag, contactName, contactPhone, contactEmail, sign = sign)
                     else -> {
                         val finalContent = processInput(input, _selectedType.value)
-                        ndefWriter.writeUri(tag, finalContent).map { finalContent } 
+                        ndefWriter.writeUri(tag, finalContent, sign = sign).map { finalContent } 
                     }
                 }
                 

@@ -36,6 +36,25 @@ class SettingsFragmentSimple : Fragment() {
             findNavController().navigate(R.id.action_settingsFragment_to_aboutDigitalCardFragment)
         }
 
+        // Developer Mode Trigger
+        var clickCount = 0
+        var lastClickTime = 0L
+        view.findViewById<TextView>(R.id.tv_author_label).setOnClickListener {
+            val currentTime = System.currentTimeMillis()
+            if (currentTime - lastClickTime > 1000) {
+                clickCount = 0
+            }
+            lastClickTime = currentTime
+            clickCount++
+
+            if (clickCount == 10) {
+                com.wuzuan.nfcdarktoolkit.MainActivity.isDeveloperMode = !com.wuzuan.nfcdarktoolkit.MainActivity.isDeveloperMode
+                val status = if (com.wuzuan.nfcdarktoolkit.MainActivity.isDeveloperMode) "開啟" else "關閉"
+                com.google.android.material.snackbar.Snackbar.make(view, "開發者模式已$status", com.google.android.material.snackbar.Snackbar.LENGTH_SHORT).show()
+                clickCount = 0
+            }
+        }
+
         // Related Links
         view.findViewById<TextView>(R.id.link_website).setOnClickListener { openUrl("https://diamondhost.tw/") }
         view.findViewById<TextView>(R.id.link_panel).setOnClickListener { openUrl("https://panel.diamondhost.tw/") }

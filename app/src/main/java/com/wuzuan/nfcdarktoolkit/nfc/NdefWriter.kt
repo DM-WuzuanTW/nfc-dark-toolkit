@@ -24,45 +24,49 @@ class NdefWriter @Inject constructor() {
     /**
      * 寫入文字到標籤
      */
-    fun writeText(tag: Tag, text: String, languageCode: String = "en"): Result<Unit> {
+    fun writeText(tag: Tag, text: String, languageCode: String = "en", sign: Boolean = false): Result<Unit> {
         val record = createTextRecord(text, languageCode)
-        val message = NdefMessage(arrayOf(record))
+        var message = NdefMessage(arrayOf(record))
+        if (sign) message = addSignatureRecord(message)
         return writeNdefMessage(tag, message)
     }
     
     /**
      * 寫入 URI 到標籤
      */
-    fun writeUri(tag: Tag, uri: String): Result<Unit> {
+    fun writeUri(tag: Tag, uri: String, sign: Boolean = false): Result<Unit> {
         val record = createUriRecord(uri)
-        val message = NdefMessage(arrayOf(record))
+        var message = NdefMessage(arrayOf(record))
+        if (sign) message = addSignatureRecord(message)
         return writeNdefMessage(tag, message)
     }
     
     /**
      * 寫入 Wi-Fi 網路到標籤
      */
-    fun writeWifi(tag: Tag, ssid: String, pass: String?, securityType: String = "WPA"): Result<String> {
+    fun writeWifi(tag: Tag, ssid: String, pass: String?, securityType: String = "WPA", sign: Boolean = false): Result<String> {
         val wifiString = "WIFI:S:$ssid;T:$securityType;P:$pass;;"
         val record = createTextRecord(wifiString)
-        val message = NdefMessage(arrayOf(record))
+        var message = NdefMessage(arrayOf(record))
+        if (sign) message = addSignatureRecord(message)
         return writeNdefMessage(tag, message).map { wifiString }
     }
     
     /**
      * 寫入簡訊到標籤
      */
-    fun writeSms(tag: Tag, phone: String, message: String): Result<String> {
+    fun writeSms(tag: Tag, phone: String, message: String, sign: Boolean = false): Result<String> {
         val smsUri = "sms:$phone?body=$message"
         val record = createUriRecord(smsUri)
-        val ndefMessage = NdefMessage(arrayOf(record))
+        var ndefMessage = NdefMessage(arrayOf(record))
+        if (sign) ndefMessage = addSignatureRecord(ndefMessage)
         return writeNdefMessage(tag, ndefMessage).map { smsUri }
     }
 
     /**
      * 寫入 vCard 到標籤
      */
-    fun writeVCard(tag: Tag, name: String?, phone: String?, email: String?): Result<String> {
+    fun writeVCard(tag: Tag, name: String?, phone: String?, email: String?, sign: Boolean = false): Result<String> {
         val vcardString = buildString {
             appendLine("BEGIN:VCARD")
             appendLine("VERSION:3.0")
@@ -78,7 +82,9 @@ class NdefWriter @Inject constructor() {
             vcardString.toByteArray(Charset.forName("UTF-8"))
         )
         val message = NdefMessage(arrayOf(record))
-        return writeNdefMessage(tag, message).map { vcardString }
+        var finalMessage = message
+        if (sign) finalMessage = addSignatureRecord(message)
+        return writeNdefMessage(tag, finalMessage).map { vcardString }
     }
     
     /**
@@ -268,5 +274,24 @@ class NdefWriter @Inject constructor() {
      */
     private fun matchUriPrefix(uri: String): Pair<Int, String> {
         return UriPrefixConstants.matchUriPrefix(uri)
+    }
+
+    /**
+     * 附加簽名 Record (如果是開發者模式)
+     */
+    fun addSignatureRecord(originalMessage: NdefMessage): NdefMessage {
+        // 簡單的簽名 Record
+        val authString = "diamondhost-verification-v1" // 這裡應該是加密後的數據
+        val authBytes = authString.toByteArray(Charset.forName("UTF-8"))
+        val authRecord = NdefRecord(
+            NdefRecord.TNF_MIME_MEDIA,
+            "application/vnd.wuzuan.auth".toByteArray(Charset.forName("US-ASCII")),
+            ByteArray(0),
+            authBytes
+        )
+        
+        // 組合新的 Records
+        val newRecords = originalMessage.records + authRecord
+        return NdefMessage(newRecords)
     }
 }

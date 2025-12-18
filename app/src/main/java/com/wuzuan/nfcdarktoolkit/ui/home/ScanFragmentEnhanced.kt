@@ -167,7 +167,7 @@ class ScanFragmentEnhanced : Fragment() {
                 val tagInfo = state.tagInfo
                 
                 // 顯示標籤資訊（參考 NFC Tools）
-                tvManufacturer.text = TagInfoHelper.getManufacturer(state.rawTag!!)
+                tvManufacturer.text = TagInfoHelper.getManufacturer(state.rawTag!!, state.tagInfo.ndefRecords)
                 tvTagId.text = tagInfo.id
                 tvTagType.text = TagInfoHelper.getDetailedTagModel(state.rawTag!!, tagInfo.type)
                 tvTechList.text = tagInfo.techList.joinToString(", ")

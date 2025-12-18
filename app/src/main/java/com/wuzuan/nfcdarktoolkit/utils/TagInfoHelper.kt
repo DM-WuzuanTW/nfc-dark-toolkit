@@ -14,13 +14,21 @@ object TagInfoHelper {
         }
     }
 
-    fun getManufacturer(tag: Tag): String {
-        // 嘗試從 Tag ID 或 Tech List 推測製造商
-        // 簡單規則：
-        // NXP: Mifare 系列, NTAG 系列
-        // Sony: Felica
-        // STMicroelectronics: ST25 系列 (通常支援 NfcV)
-        
+    fun getManufacturer(tag: Tag, records: List<com.wuzuan.nfcdarktoolkit.domain.model.ParsedNdefRecord>? = null): String {
+        // 1. 優先檢查是否包含鑽石託管的加密簽名
+        records?.let {
+            val authRecord = it.find { record -> 
+                record.recordType == com.wuzuan.nfcdarktoolkit.domain.model.RecordType.MIME && 
+                record.mimeType == "application/vnd.wuzuan.auth" 
+            }
+            if (authRecord != null) {
+                // 這裡可以加入更複雜的解密驗證邏輯
+                // 目前僅檢查是否存在且有內容
+                return "鑽石託管 (Diamond Host)"
+            }
+        }
+
+        // 2. 嘗試從 Tag ID 或 Tech List 推測製造商
         val techList = tag.techList.map { it.split('.').last() }
         
         return when {
