@@ -41,6 +41,10 @@ class WriteProfessionalFragment : Fragment() {
     private lateinit var btnPickLocation: Button
     private lateinit var tvHint: TextView
     private lateinit var btnWrite: Button
+    
+    // 等待寫入的狀態
+    private var isWaitingForTag = false
+    private var waitingDialog: androidx.appcompat.app.AlertDialog? = null
     private lateinit var progressBar: ProgressBar
     
     private lateinit var layoutContactInput: LinearLayout
@@ -227,7 +231,7 @@ class WriteProfessionalFragment : Fragment() {
                         is WriteProfessionalState.Idle -> {
                             progressBar.visibility = View.GONE
                             btnWrite.isEnabled = true
-                            btnWrite.text = "靠近標籤以寫入"
+                            btnWrite.text = "寫入"
                         }
                         is WriteProfessionalState.Writing -> {
                             progressBar.visibility = View.VISIBLE
@@ -237,22 +241,21 @@ class WriteProfessionalFragment : Fragment() {
                         is WriteProfessionalState.Success -> {
                             progressBar.visibility = View.GONE
                             btnWrite.isEnabled = true
-                            btnWrite.text = "靠近標籤以寫入"
+                            btnWrite.text = "寫入"
                             Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG).show()
-                            etInput.text?.clear()
-                            etWifiPassword.text?.clear()
-                            etSmsPhone.text?.clear()
-                            etContactName.text?.clear()
-                            etContactPhone.text?.clear()
-                            etContactEmail.text?.clear()
+                            // 不再清空輸入框，讓用戶可以連續寫入多張相同內容的卡片
+                            // 關閉對話框並重置等待狀態
+                            dismissWaitingDialog()
                         }
                         is WriteProfessionalState.Error -> {
                             progressBar.visibility = View.GONE
                             btnWrite.isEnabled = true
-                            btnWrite.text = "靠近標籤以寫入"
+                            btnWrite.text = "寫入"
                             Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG)
                                 .setBackgroundTint(requireContext().getColor(R.color.color_error))
                                 .show()
+                            // 關閉對話框並重置等待狀態
+                            dismissWaitingDialog()
                         }
                     }
                 }
@@ -266,14 +269,68 @@ class WriteProfessionalFragment : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 mainActivity.nfcTagFlow.collect { tag ->
-                    handleWrite(tag)
+                    // 只有在等待寫入狀態時才處理 NFC 標籤
+                    if (isWaitingForTag) {
+                        handleWrite(tag)
+                    }
                 }
             }
         }
         
+        // 修改按鈕點擊邏輯：顯示對話框並進入等待狀態
         btnWrite.setOnClickListener {
-            Snackbar.make(requireView(), "請靠近 NFC 標籤", Snackbar.LENGTH_SHORT).show()
+            showWaitingDialog()
         }
+    }
+    
+    /**
+     * 顯示等待靠卡的對話框
+     */
+    private fun showWaitingDialog() {
+        // 驗證輸入
+        val currentType = viewModel.selectedType.value
+        val input = etInput.text.toString()
+        val contactName = etContactName.text.toString()
+        val contactPhone = etContactPhone.text.toString()
+        val contactEmail = etContactEmail.text.toString()
+        
+        // 簡單驗證
+        if (currentType != WriteType.CONTACT && input.isBlank()) {
+            Snackbar.make(requireView(), "請先輸入內容", Snackbar.LENGTH_SHORT).show()
+            return
+        }
+        if (currentType == WriteType.CONTACT && contactName.isBlank() && contactPhone.isBlank() && contactEmail.isBlank()) {
+            Snackbar.make(requireView(), "請先輸入聯絡人資訊", Snackbar.LENGTH_SHORT).show()
+            return
+        }
+        
+        isWaitingForTag = true
+        
+        waitingDialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setTitle("準備寫入")
+            .setMessage("請將 NFC 卡靠近手機背面...")
+            .setIcon(R.drawable.ic_scan)
+            .setCancelable(true)
+            .setNegativeButton("取消") { dialog, _: Int ->
+                dismissWaitingDialog()
+                dialog.dismiss()
+            }
+            .setOnDismissListener {
+                // 對話框被關閉時，重置等待狀態
+                if (isWaitingForTag) {
+                    isWaitingForTag = false
+                }
+            }
+            .show()
+    }
+    
+    /**
+     * 關閉等待對話框
+     */
+    private fun dismissWaitingDialog() {
+        isWaitingForTag = false
+        waitingDialog?.dismiss()
+        waitingDialog = null
     }
     
     private fun handleWrite(tag: android.nfc.Tag) {
