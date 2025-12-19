@@ -35,7 +35,7 @@ enum class WriteType(val displayName: String, val category: String) {
     ADDRESS("地址", "位置"),
     
     // 其他
-    BITCOIN("比特幣錢包", "其他"),
+    BITCOIN("虛擬貨幣錢包", "其他"),
     BLUETOOTH("藍牙", "其他"),
     WIFI("Wi-Fi 網路", "其他");
     
@@ -93,7 +93,7 @@ object SocialUrlBuilder {
             WriteType.SMS -> "輸入簡訊內容"
             WriteType.LOCATION -> "輸入座標（緯度,經度）"
             WriteType.ADDRESS -> "輸入地址"
-            WriteType.BITCOIN -> "輸入比特幣錢包地址"
+            WriteType.BITCOIN -> "輸入虛擬貨幣錢包地址"
             WriteType.BLUETOOTH -> "輸入藍牙裝置 MAC"
             WriteType.WIFI -> "輸入 WiFi SSID"
         }

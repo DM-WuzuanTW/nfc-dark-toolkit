@@ -139,6 +139,24 @@
                 android:text="選擇聯絡人"
                 android:visibility="gone" />
                 
+            <Button
+                android:id="@+id/btn_pick_wifi"
+                style="@style/Widget.NFCDarkToolkit.Button.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:text="選擇 WiFi"
+                android:visibility="gone" />
+                
+            <Button
+                android:id="@+id/btn_pick_bluetooth"
+                style="@style/Widget.NFCDarkToolkit.Button.Outlined"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:layout_marginTop="8dp"
+                android:text="選擇藍牙裝置"
+                android:visibility="gone" />
+                
             <LinearLayout
                 android:id="@+id/layout_contact_input"
                 android:layout_width="match_parent"

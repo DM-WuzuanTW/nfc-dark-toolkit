@@ -21,6 +21,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import com.google.android.material.snackbar.Snackbar
 import com.wuzuan.nfcdarktoolkit.MainActivity
 import com.wuzuan.nfcdarktoolkit.R
+import com.wuzuan.nfcdarktoolkit.utils.Logger
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -39,6 +40,8 @@ class WriteProfessionalFragment : Fragment() {
     private lateinit var etSmsPhone: EditText
     private lateinit var btnPickContact: Button
     private lateinit var btnPickLocation: Button
+    private lateinit var btnPickWifi: Button
+    private lateinit var btnPickBluetooth: Button
     private lateinit var tvHint: TextView
     private lateinit var btnWrite: Button
     
@@ -86,19 +89,35 @@ class WriteProfessionalFragment : Fragment() {
         }
     }
     
-    private val pickLocationLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            result.data?.data?.let { locationUri ->
-                etInput.setText(locationUri.toString())
-            }
-        }
-    }
-    
     private val requestPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
         if (isGranted) {
             launchContactPicker()
         } else {
             Snackbar.make(requireView(), "需要聯絡人權限才能選擇聯絡人", Snackbar.LENGTH_LONG).show()
+        }
+    }
+    
+    private val requestLocationPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+        if (isGranted) {
+            getCurrentLocation()
+        } else {
+            Snackbar.make(requireView(), "需要位置權限才能獲取當前位置", Snackbar.LENGTH_LONG).show()
+        }
+    }
+    
+    private val requestWifiPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestPermission()) { isGranted: Boolean ->
+        if (isGranted) {
+            scanWifi()
+        } else {
+            Snackbar.make(requireView(), "需要位置權限才能掃描 WiFi", Snackbar.LENGTH_LONG).show()
+        }
+    }
+    
+    private val requestBluetoothPermissionLauncher = registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+        if (permissions.values.all { it }) {
+            scanBluetooth()
+        } else {
+            Snackbar.make(requireView(), "需要藍牙權限才能掃描裝置", Snackbar.LENGTH_LONG).show()
         }
     }
 
@@ -127,6 +146,8 @@ class WriteProfessionalFragment : Fragment() {
         etSmsPhone = view.findViewById(R.id.et_sms_phone)
         btnPickContact = view.findViewById(R.id.btn_pick_contact)
         btnPickLocation = view.findViewById(R.id.btn_pick_location)
+        btnPickWifi = view.findViewById(R.id.btn_pick_wifi)
+        btnPickBluetooth = view.findViewById(R.id.btn_pick_bluetooth)
         tvHint = view.findViewById(R.id.tv_hint)
         btnWrite = view.findViewById(R.id.btn_write_pro)
         progressBar = view.findViewById(R.id.progress_write_pro)
@@ -151,8 +172,57 @@ class WriteProfessionalFragment : Fragment() {
         }
         
         btnPickLocation.setOnClickListener {
-            launchLocationPicker()
+            showLocationPickerDialog()
         }
+        
+        btnPickWifi.setOnClickListener {
+            showWifiPickerDialog()
+        }
+        
+        btnPickBluetooth.setOnClickListener {
+            showBluetoothPickerDialog()
+        }
+    }
+    
+    /**
+     * 顯示地點選擇對話框
+     */
+    private fun showLocationPickerDialog() {
+        val options = arrayOf("輸入地址或地點名稱", "使用當前位置")
+        
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setTitle("選擇地點")
+            .setItems(options) { _, which ->
+                when (which) {
+                    0 -> showAddressInputDialog()
+                    1 -> requestCurrentLocation()
+                }
+            }
+            .show()
+    }
+    
+    /**
+     * 顯示地址輸入對話框
+     */
+    private fun showAddressInputDialog() {
+        val input = EditText(requireContext())
+        input.hint = "例如：台北101、台北市信義區..."
+        
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setTitle("輸入地點")
+            .setMessage("請輸入地址、地點名稱或經緯度")
+            .setView(input)
+            .setPositiveButton("確定") { _, _ ->
+                val address = input.text.toString().trim()
+                if (address.isNotEmpty()) {
+                    etInput.setText(address)
+                    Snackbar.make(requireView(), "✓ 已設定地點", Snackbar.LENGTH_SHORT).show()
+                } else {
+                    Snackbar.make(requireView(), "請輸入有效的地點", Snackbar.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
     }
     
     private fun launchContactPicker() {
@@ -160,9 +230,49 @@ class WriteProfessionalFragment : Fragment() {
         pickContactLauncher.launch(intent)
     }
     
-    private fun launchLocationPicker() {
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=0,0(地點)"))
-        pickLocationLauncher.launch(intent)
+    /**
+     * 請求並獲取當前位置
+     */
+    private fun requestCurrentLocation() {
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                getCurrentLocation()
+            }
+            else -> {
+                requestLocationPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+    }
+    
+    /**
+     * 獲取當前位置
+     */
+    private fun getCurrentLocation() {
+        try {
+            val fusedLocationClient = com.google.android.gms.location.LocationServices.getFusedLocationProviderClient(requireActivity())
+            
+            if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+                    if (location != null) {
+                        val latitude = location.latitude
+                        val longitude = location.longitude
+                        etInput.setText("$latitude,$longitude")
+                        Snackbar.make(requireView(), "✓ 已獲取當前位置", Snackbar.LENGTH_SHORT).show()
+                    } else {
+                        Snackbar.make(requireView(), "無法獲取位置，請手動輸入經緯度", Snackbar.LENGTH_LONG).show()
+                    }
+                }.addOnFailureListener { e ->
+                    Logger.w("獲取位置失敗: ${e.message}", e)
+                    Snackbar.make(requireView(), "獲取位置失敗: ${e.message}", Snackbar.LENGTH_LONG).show()
+                }
+            }
+        } catch (e: Exception) {
+            Logger.w("獲取位置時發生錯誤: ${e.message}", e)
+            Snackbar.make(requireView(), "請確認已安裝 Google Play Services", Snackbar.LENGTH_LONG).show()
+        }
     }
     
     private fun setupCategorySpinner() {
@@ -221,6 +331,8 @@ class WriteProfessionalFragment : Fragment() {
         
         btnPickLocation.visibility = if (type == WriteType.LOCATION) View.VISIBLE else View.GONE
         btnPickContact.visibility = if (type == WriteType.CONTACT) View.VISIBLE else View.GONE
+        btnPickWifi.visibility = if (type == WriteType.WIFI) View.VISIBLE else View.GONE
+        btnPickBluetooth.visibility = if (type == WriteType.BLUETOOTH) View.VISIBLE else View.GONE
         etSmsPhone.visibility = if (type == WriteType.SMS) View.VISIBLE else View.GONE
         etWifiPassword.visibility = if (type == WriteType.WIFI) View.VISIBLE else View.GONE
     }
@@ -433,6 +545,178 @@ class WriteProfessionalFragment : Fragment() {
         val contactEmail = etContactEmail.text.toString()
         
         viewModel.writeToTag(tag, input, wifiPassword, smsPhone, contactName, contactPhone, contactEmail)
+    }
+    
+    /**
+     * 顯示 WiFi 選擇對話框（檢查權限）
+     */
+    private fun showWifiPickerDialog() {
+        // WiFi 掃描需要位置權限（因為可以通過 WiFi 推斷位置）
+        when {
+            ContextCompat.checkSelfPermission(
+                requireContext(),
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                scanWifi()
+            }
+            else -> {
+                requestWifiPermissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+    }
+    
+    /**
+     * 實際執行 WiFi 掃描
+     */
+    @Suppress("DEPRECATION")
+    private fun scanWifi() {
+        try {
+            val wifiManager = requireContext().applicationContext.getSystemService(android.content.Context.WIFI_SERVICE) as android.net.wifi.WifiManager
+            
+            val wifiList = mutableListOf<String>()
+            
+            // 1. 獲取當前連接的 WiFi
+            val currentWifi = wifiManager.connectionInfo
+            if (currentWifi != null && currentWifi.ssid != null && currentWifi.ssid != "<unknown ssid>") {
+                val ssid = currentWifi.ssid.replace("\"", "")
+                if (ssid.isNotEmpty()) {
+                    wifiList.add("$ssid (當前連接)")
+                }
+            }
+            
+            // 2. 獲取已配置的 WiFi 網路（Android 10 以下）
+            try {
+                if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
+                    val configuredNetworks = wifiManager.configuredNetworks
+                    configuredNetworks?.forEach { config ->
+                        val ssid = config.SSID?.replace("\"", "") ?: ""
+                        if (ssid.isNotEmpty() && !wifiList.any { it.startsWith(ssid) }) {
+                            wifiList.add(ssid)
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                Logger.w("獲取已配置 WiFi 失敗: ${e.message}", e)
+            }
+            
+            // 3. 如果有結果，顯示列表
+            if (wifiList.isNotEmpty()) {
+                val options = wifiList.toTypedArray()
+                
+                com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                    .setTitle("選擇 WiFi")
+                    .setItems(options) { _, which ->
+                        val selectedSsid = options[which].replace(" (當前連接)", "")
+                        etInput.setText(selectedSsid)
+                        Snackbar.make(requireView(), "✓ 已選擇 WiFi: $selectedSsid", Snackbar.LENGTH_SHORT).show()
+                    }
+                    .setNeutralButton("手動輸入") { _, _ ->
+                        showWifiInputDialog()
+                    }
+                    .setNegativeButton("取消", null)
+                    .show()
+            } else {
+                // 沒有找到 WiFi，直接顯示輸入對話框
+                showWifiInputDialog()
+            }
+        } catch (e: Exception) {
+            Logger.w("獲取 WiFi 列表失敗: ${e.message}", e)
+            showWifiInputDialog()
+        }
+    }
+    
+    /**
+     * 顯示 WiFi SSID 輸入對話框
+     */
+    private fun showWifiInputDialog() {
+        val input = EditText(requireContext())
+        input.hint = "例如：My-WiFi"
+        
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+            .setTitle("輸入 WiFi 名稱")
+            .setMessage("請輸入 WiFi SSID（網路名稱）")
+            .setView(input)
+            .setPositiveButton("確定") { _, _ ->
+                val ssid = input.text.toString().trim()
+                if (ssid.isNotEmpty()) {
+                    etInput.setText(ssid)
+                    Snackbar.make(requireView(), "✓ 已設定 WiFi", Snackbar.LENGTH_SHORT).show()
+                } else {
+                    Snackbar.make(requireView(), "請輸入有效的 WiFi 名稱", Snackbar.LENGTH_SHORT).show()
+                }
+            }
+            .setNegativeButton("取消", null)
+            .show()
+    }
+    
+    /**
+     * 顯示藍牙選擇對話框（檢查權限）
+     */
+    private fun showBluetoothPickerDialog() {
+        // Android 12+ 需要新的藍牙權限
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            val permissions = arrayOf(
+                Manifest.permission.BLUETOOTH_CONNECT,
+                Manifest.permission.BLUETOOTH_SCAN
+            )
+            val allGranted = permissions.all {
+                ContextCompat.checkSelfPermission(requireContext(), it) == PackageManager.PERMISSION_GRANTED
+            }
+            
+            if (allGranted) {
+                scanBluetooth()
+            } else {
+                requestBluetoothPermissionLauncher.launch(permissions)
+            }
+        } else {
+            // Android 11 及以下直接掃描
+            scanBluetooth()
+        }
+    }
+    
+    /**
+     * 實際執行藍牙掃描
+     */
+    @Suppress("DEPRECATION", "MissingPermission")
+    private fun scanBluetooth() {
+        try {
+            val bluetoothAdapter = android.bluetooth.BluetoothAdapter.getDefaultAdapter()
+            
+            if (bluetoothAdapter == null) {
+                Snackbar.make(requireView(), "此裝置不支援藍牙", Snackbar.LENGTH_LONG).show()
+                return
+            }
+            
+            if (!bluetoothAdapter.isEnabled) {
+                Snackbar.make(requireView(), "請先開啟藍牙", Snackbar.LENGTH_LONG).show()
+                return
+            }
+            
+            val pairedDevices = bluetoothAdapter.bondedDevices
+            
+            if (pairedDevices.isEmpty()) {
+                Snackbar.make(requireView(), "未找到已配對的藍牙裝置", Snackbar.LENGTH_LONG).show()
+                return
+            }
+            
+            val devices = pairedDevices.map { "${it.name} (${it.address})" }.toTypedArray()
+            val addresses = pairedDevices.map { it.address }.toTypedArray()
+            
+            com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
+                .setTitle("選擇藍牙裝置")
+                .setItems(devices) { _, which ->
+                    etInput.setText(addresses[which])
+                    Snackbar.make(requireView(), "✓ 已選擇: ${devices[which]}", Snackbar.LENGTH_SHORT).show()
+                }
+                .setNegativeButton("取消", null)
+                .show()
+        } catch (e: SecurityException) {
+            Logger.w("缺少藍牙權限: ${e.message}", e)
+            Snackbar.make(requireView(), "需要藍牙權限，請在設定中授權", Snackbar.LENGTH_LONG).show()
+        } catch (e: Exception) {
+            Logger.w("獲取藍牙裝置失敗: ${e.message}", e)
+            Snackbar.make(requireView(), "無法獲取藍牙裝置，請手動輸入", Snackbar.LENGTH_LONG).show()
+        }
     }
     
     override fun onDestroyView() {
