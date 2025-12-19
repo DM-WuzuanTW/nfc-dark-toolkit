@@ -45,6 +45,8 @@ class WriteProfessionalFragment : Fragment() {
     // 等待寫入的狀態
     private var isWaitingForTag = false
     private var waitingDialog: androidx.appcompat.app.AlertDialog? = null
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var animationRunnable: Runnable? = null
     private lateinit var progressBar: ProgressBar
     
     private lateinit var layoutContactInput: LinearLayout
@@ -244,8 +246,8 @@ class WriteProfessionalFragment : Fragment() {
                             btnWrite.text = "寫入"
                             Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG).show()
                             // 不再清空輸入框，讓用戶可以連續寫入多張相同內容的卡片
-                            // 關閉對話框並重置等待狀態
-                            dismissWaitingDialog()
+                            // 更新對話框為成功狀態，停留一下再關閉
+                            showSuccessDialog()
                         }
                         is WriteProfessionalState.Error -> {
                             progressBar.visibility = View.GONE
@@ -254,8 +256,8 @@ class WriteProfessionalFragment : Fragment() {
                             Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG)
                                 .setBackgroundTint(requireContext().getColor(R.color.color_error))
                                 .show()
-                            // 關閉對話框並重置等待狀態
-                            dismissWaitingDialog()
+                            // 更新對話框為失敗狀態，停留一下再關閉
+                            showErrorDialog(state.message)
                         }
                     }
                 }
@@ -287,6 +289,9 @@ class WriteProfessionalFragment : Fragment() {
      * 顯示等待靠卡的對話框
      */
     private fun showWaitingDialog() {
+        // 先清理舊的對話框（如果存在）
+        dismissWaitingDialogImmediately()
+        
         // 驗證輸入
         val currentType = viewModel.selectedType.value
         val input = etInput.text.toString()
@@ -308,7 +313,7 @@ class WriteProfessionalFragment : Fragment() {
         
         waitingDialog = com.google.android.material.dialog.MaterialAlertDialogBuilder(requireContext())
             .setTitle("準備寫入")
-            .setMessage("請將 NFC 卡靠近手機背面...")
+            .setMessage("請將 NFC 卡靠近手機背面")
             .setIcon(R.drawable.ic_scan)
             .setCancelable(true)
             .setNegativeButton("取消") { dialog, _: Int ->
@@ -316,21 +321,111 @@ class WriteProfessionalFragment : Fragment() {
                 dialog.dismiss()
             }
             .setOnDismissListener {
-                // 對話框被關閉時，重置等待狀態
+                // 對話框被關閉時，停止動畫並重置等待狀態
+                stopAnimation()
                 if (isWaitingForTag) {
                     isWaitingForTag = false
                 }
+                waitingDialog = null
             }
             .show()
+            
+        // 啟動動態文字效果
+        startWaitingAnimation()
     }
     
     /**
-     * 關閉等待對話框
+     * 啟動等待動畫（動態點點點效果）
+     */
+    private fun startWaitingAnimation() {
+        var dotCount = 0
+        animationRunnable = object : Runnable {
+            override fun run() {
+                waitingDialog?.let { dialog ->
+                    val dots = ".".repeat((dotCount % 4))
+                    dialog.setMessage("請將 NFC 卡靠近手機背面$dots")
+                    dotCount++
+                    handler.postDelayed(this, 500) // 每 500ms 更新一次
+                }
+            }
+        }
+        handler.post(animationRunnable!!)
+    }
+    
+    /**
+     * 停止動畫
+     */
+    private fun stopAnimation() {
+        animationRunnable?.let {
+            handler.removeCallbacks(it)
+            animationRunnable = null
+        }
+    }
+    
+    /**
+     * 顯示成功對話框
+     */
+    private fun showSuccessDialog() {
+        stopAnimation()
+        // 先移除所有舊的延遲任務
+        handler.removeCallbacksAndMessages(null)
+        
+        waitingDialog?.let { dialog ->
+            dialog.setTitle("✓ 寫入成功")
+            dialog.setMessage("NFC 卡已成功寫入資料！")
+            dialog.findViewById<android.widget.Button>(android.R.id.button2)?.visibility = View.GONE
+            
+            // 1.5 秒後自動關閉
+            handler.postDelayed({
+                dismissWaitingDialog()
+            }, 1500)
+        }
+    }
+    
+    /**
+     * 顯示失敗對話框
+     */
+    private fun showErrorDialog(message: String) {
+        stopAnimation()
+        // 先移除所有舊的延遲任務
+        handler.removeCallbacksAndMessages(null)
+        
+        waitingDialog?.let { dialog ->
+            dialog.setTitle("✗ 寫入失敗")
+            dialog.setMessage(message)
+            dialog.findViewById<android.widget.Button>(android.R.id.button2)?.visibility = View.GONE
+            
+            // 2 秒後自動關閉
+            handler.postDelayed({
+                dismissWaitingDialog()
+            }, 2000)
+        }
+    }
+    
+    /**
+     * 關閉等待對話框（用於取消或手動關閉，會重置狀態）
      */
     private fun dismissWaitingDialog() {
+        stopAnimation()
+        isWaitingForTag = false
+        waitingDialog?.dismiss()
+        // 重置 ViewModel 狀態，允許下一次寫入
+        viewModel.resetState()
+        // waitingDialog 會在 onDismissListener 中被設為 null
+    }
+    
+    /**
+     * 立即清理對話框（用於在創建新對話框前清理舊的）
+     */
+    private fun dismissWaitingDialogImmediately() {
+        stopAnimation()
         isWaitingForTag = false
         waitingDialog?.dismiss()
         waitingDialog = null
+        // 移除所有延遲任務
+        handler.removeCallbacksAndMessages(null)
+        // 重置 ViewModel 狀態，允許下一次寫入
+        viewModel.resetState()
     }
     
     private fun handleWrite(tag: android.nfc.Tag) {
@@ -342,5 +437,12 @@ class WriteProfessionalFragment : Fragment() {
         val contactEmail = etContactEmail.text.toString()
         
         viewModel.writeToTag(tag, input, wifiPassword, smsPhone, contactName, contactPhone, contactEmail)
+    }
+    
+    override fun onDestroyView() {
+        super.onDestroyView()
+        // 清理資源
+        stopAnimation()
+        dismissWaitingDialog()
     }
 }

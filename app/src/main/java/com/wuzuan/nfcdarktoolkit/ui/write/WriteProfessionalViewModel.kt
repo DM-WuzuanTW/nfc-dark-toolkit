@@ -34,6 +34,10 @@ class WriteProfessionalViewModel @Inject constructor(
         _writeState.value = WriteProfessionalState.Idle
     }
     
+    fun resetState() {
+        _writeState.value = WriteProfessionalState.Idle
+    }
+    
     fun writeToTag(tag: Tag, input: String, wifiPassword: String? = null, smsPhone: String? = null, contactName: String? = null, contactPhone: String? = null, contactEmail: String? = null) {
         viewModelScope.launch {
             try {
