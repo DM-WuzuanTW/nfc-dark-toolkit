@@ -244,7 +244,6 @@ class WriteProfessionalFragment : Fragment() {
                             progressBar.visibility = View.GONE
                             btnWrite.isEnabled = true
                             btnWrite.text = "寫入"
-                            Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG).show()
                             // 不再清空輸入框，讓用戶可以連續寫入多張相同內容的卡片
                             // 更新對話框為成功狀態，停留一下再關閉
                             showSuccessDialog()
@@ -253,9 +252,6 @@ class WriteProfessionalFragment : Fragment() {
                             progressBar.visibility = View.GONE
                             btnWrite.isEnabled = true
                             btnWrite.text = "寫入"
-                            Snackbar.make(requireView(), state.message, Snackbar.LENGTH_LONG)
-                                .setBackgroundTint(requireContext().getColor(R.color.color_error))
-                                .show()
                             // 更新對話框為失敗狀態，停留一下再關閉
                             showErrorDialog(state.message)
                         }
