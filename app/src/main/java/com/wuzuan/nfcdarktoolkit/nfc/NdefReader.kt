@@ -114,6 +114,7 @@ class NdefReader @Inject constructor() {
         val payloadString = when (recordType) {
             NdefRecordType.TEXT -> parseTextRecord(record)
             NdefRecordType.URI -> parseUriRecord(record)
+            NdefRecordType.MIME -> parseMimeRecord(record)
             else -> bytesToHexString(payload)
         }
         
@@ -206,6 +207,31 @@ class NdefReader @Inject constructor() {
         } catch (e: Exception) {
             Logger.w("解析 URI Record 失敗: ${e.message}", e)
             bytesToHexString(record.payload)
+        }
+    }
+    
+    /**
+     * 解析 MIME Record (例如 vCard, JSON 等)
+     */
+    private fun parseMimeRecord(record: NdefRecord): String {
+        return try {
+            val payload = record.payload
+            
+            if (payload.isEmpty()) {
+                Logger.w("MIME Record payload 為空")
+                return ""
+            }
+            
+            // MIME payload 通常直接是 UTF-8 編碼的內容
+            String(payload, Charset.forName("UTF-8"))
+        } catch (e: Exception) {
+            Logger.w("解析 MIME Record 失敗: ${e.message}", e)
+            // 如果 UTF-8 解析失敗，嘗試其他編碼或返回十六進位
+            try {
+                String(record.payload, Charset.defaultCharset())
+            } catch (e2: Exception) {
+                bytesToHexString(record.payload)
+            }
         }
     }
     

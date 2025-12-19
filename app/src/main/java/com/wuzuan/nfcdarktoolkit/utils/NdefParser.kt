@@ -2,6 +2,7 @@ package com.wuzuan.nfcdarktoolkit.utils
 
 import com.wuzuan.nfcdarktoolkit.domain.model.ParsedNdefRecord
 import com.wuzuan.nfcdarktoolkit.domain.model.RecordType
+import com.wuzuan.nfcdarktoolkit.utils.Logger
 
 object NdefParser {
 
@@ -130,16 +131,37 @@ object NdefParser {
 
     private fun parseVCard(payload: String): String {
         // 簡單解析 vCard，解決可能的亂碼問題 (vCard 3.0 通常 UTF-8，但有時會有 QP 編碼，這裡做簡易處理)
-        val name = payload.lines().find { it.startsWith("FN:") }?.substring(3) ?: "未知"
-        val phone = payload.lines().find { it.startsWith("TEL:") }?.substring(4) ?: "未知"
-        val email = payload.lines().find { it.startsWith("EMAIL:") }?.substring(6) ?: "未知"
-
-        return buildString {
-            appendLine("通訊 (聯絡人):")
-            appendLine("  姓名: $name")
-            appendLine("  電話: $phone")
-            appendLine("  Email: $email")
-        }.trim()
+        return try {
+            val lines = payload.lines().map { it.trim() }.filter { it.isNotEmpty() }
+            
+            val name = lines.find { it.startsWith("FN:") }
+                ?.substringAfter("FN:", "")
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
+                ?: "未知"
+                
+            val phone = lines.find { it.startsWith("TEL:") }
+                ?.substringAfter("TEL:", "")
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
+                ?: "未提供"
+                
+            val email = lines.find { it.startsWith("EMAIL:") }
+                ?.substringAfter("EMAIL:", "")
+                ?.trim()
+                ?.takeIf { it.isNotEmpty() }
+                ?: "未提供"
+            
+            buildString {
+                appendLine("通訊 (聯絡人):")
+                appendLine("  姓名: $name")
+                appendLine("  電話: $phone")
+                appendLine("  Email: $email")
+            }.trim()
+        } catch (e: Exception) {
+            Logger.w("解析 vCard 失敗: ${e.message}", e)
+            "通訊 (聯絡人):\n(解析失敗)"
+        }
     }
     
     private fun parseWifi(payload: String): String {
